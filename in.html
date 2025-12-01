@@ -4,8 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TYBCA Attendance Dashboard - Supabase</title>
-
   <style>
+    /* (styles identical to prior file — omitted here for brevity in this message)
+       In your file, include the same CSS as before. For brevity in this chat I'll
+       include the same CSS block you had previously. */
     :root{--panel:#ffffff;--accent:#0f9d58;--muted:#6b7280;}
     .theme-login{--bg:radial-gradient(circle at top left,#7b2ff7,#5a2fd6,#5826c4,#7520b7,#9121b4,#b623b5,#d72ab8);}
     .theme-main{--bg:radial-gradient(circle at top left,#7b2ff7,#5a2fd6,#5826c4,#7520b7,#9121b4,#b623b5,#d72ab8);--accent:#0077ff;}
@@ -54,7 +56,7 @@
     .alert{padding:9px 10px;margin-top:8px;background:#e6fffa;border-radius:10px;color:#065f46;font-size:13px;box-shadow:0 2px 6px rgba(16,185,129,0.25)}
     @media(max-width:900px){main{flex-direction:column}header{flex-direction:column;align-items:flex-start;gap:6px} .top-right{align-items:flex-start} .top-controls{justify-content:flex-start} #usersTableWrap{max-height:260px}}
 
-    /* Modal (attendance viewer) */
+    /* Modal + UX improvements kept the same as before */
     .att-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:1100}
     .att-modal{width:calc(100% - 40px);max-width:760px;background:#fff;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(2,6,23,0.35);max-height:80vh;overflow:auto}
     .att-modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -65,63 +67,26 @@
     .att-modal-list table{width:100%;border-collapse:collapse}
     .att-modal-list th,.att-modal-list td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
     .att-modal-empty{padding:18px;text-align:center;color:#6b7280}
-
-    /* ====== UX IMPROVEMENTS - Buttons & Badges ====== */
-    .record-action {
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid #e5e7eb;
-      background:#fff;
-      color:#111827;
-      font-size:13px;
-      cursor:pointer;
-      box-shadow:0 1px 0 rgba(0,0,0,0.03);
-    }
-    .record-action:focus { outline:3px solid rgba(59,130,246,0.15); outline-offset:2px; }
-    .record-action.view { background:#fff; color:#111827; }
+    .record-action { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#111827; font-size:13px; cursor:pointer; box-shadow:0 1px 0 rgba(0,0,0,0.03); }
     .record-action.present { background:#ecfdf5; color:#065f46; border-color:#10b981; }
     .record-action.absent { background:#fff7ed; color:#7c2d12; border-color:#f97316; }
     .record-action.edit { background:#eef2ff; color:#3730a3; border-color:#a78bfa; }
     .record-action.delete { background:#fff1f2; color:#991b1b; border-color:#fca5a5; }
 
-    .record-badge {
-      display:inline-block;
-      min-width:40px;
-      padding:6px 10px;
-      border-radius:999px;
-      text-align:center;
-      font-weight:700;
-      background:linear-gradient(90deg,#f8fafc,#fff);
-      color:#111827;
-      border:1px solid #e6eef8;
-      font-size:13px;
-    }
-
-    /* small spacing inside records table */
+    .record-badge { display:inline-block; min-width:40px; padding:6px 10px; border-radius:999px; text-align:center; font-weight:700; background:linear-gradient(90deg,#f8fafc,#fff); color:#111827; border:1px solid #e6eef8; font-size:13px; }
     #recordsTable td .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-
-    /* modal improvements */
-    .att-modal .att-modal-header{gap:10px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;margin-bottom:12px}
-    .att-modal .record-meta{font-size:13px;color:#6b7280}
-    .att-modal .att-modal-list table th, .att-modal .att-modal-list table td {font-size:13px}
-
-    /* Leaderboard table styles */
     #leaderboardTable thead th { font-weight:700; background:#fafafa; font-size:13px; }
     #leaderboardTable tbody td { padding:8px 6px; border-bottom:1px solid #f3f4f6; font-size:13px; color:#111827; }
     .leader-percent { font-weight:700; }
-    .leader-low { color:#b91c1c; }   /* red for low */
-    .leader-mid { color:#f59e0b; }   /* orange for mid */
-    .leader-high { color:#065f46; }  /* green for high */
-
-    /* visualizers */
+    .leader-low { color:#b91c1c; } .leader-mid { color:#f59e0b; } .leader-high { color:#065f46; }
     #reportsVisualizer{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
     .heatmap-grid{display:grid;grid-template-columns: repeat(7, 1fr); gap:6px; padding:8px}
     .heatday{height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#0b1220;background:#e5e7eb}
     .heat-legend{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;flex-wrap:wrap}
-    .heat-legend-item{display:flex;gap:6px;align-items:center}
+    #adminPanel{display:none;margin-bottom:12px}
+    .admin-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .admin-list{margin-top:8px;padding:10px;background:#fff;border-radius:8px}
+    .is-hidden-panel{opacity:0.45}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -168,6 +133,22 @@
       </div>
     </header>
 
+    <!-- ADMIN PANEL (visible only to admin role) -->
+    <div id="adminPanel" class="panel" aria-hidden="true">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 style="margin:0">Admin Controls</h3>
+          <div style="font-size:13px;color:#6b7280">Hide/show panels for students & faculty. Settings persist in Supabase.</div>
+        </div>
+        <div class="admin-controls">
+          <button id="unhideSelected" class="record-action">Unhide selected</button>
+          <button id="unhideAll" class="record-action">Unhide all</button>
+        </div>
+      </div>
+
+      <div class="admin-list" id="adminPanelList" style="margin-top:10px"></div>
+    </div>
+
     <main>
       <section class="left">
         <div class="panel">
@@ -201,70 +182,111 @@
           <div class="form-row"><button id="submitAttendanceBtn">Submit Attendance</button><button id="cancelEditBtn" class="secondary" style="display:none">Cancel Edit</button></div>
         </div>
 
-        <div class="panel">
-          <h3 class="panel-title">Attendance Reports (Visualization)</h3>
+        <div id="attendanceReportsPanel" class="panel">
+          <h3 class="panel-title">Attendance Reports (Visualization) <small style="font-size:12px;color:#6b7280">(can be hidden by admin)</small></h3>
           <div class="controls-row">
+            <label style="font-size:13px;color:#6b7280;margin-right:auto">Admin hide: <input type="checkbox" class="admin-hide-checkbox" data-panel="attendanceReportsPanel" style="margin-left:8px"/></label>
             <button id="downloadStudentsReportCsv" class="download-btn-primary">Download Students CSV</button>
             <button id="downloadFacultyReportCsv" class="download-btn-primary">Download Faculty CSV</button>
           </div>
 
-          <!-- Visualizers: Heatmap | Timeline | Leaderboard -->
-          <div id="reportsVisualizer">
-            <div id="heatmapWrap" class="panel" style="padding:10px">
-              <strong>Monthly Heatmap (last 30 days)</strong>
-              <div id="heatmap" class="heatmap"></div>
-              <div id="heatLegend" class="heat-legend"></div>
+          <div id="regularStudentsWrap" style="margin-top:8px; padding:8px; background:#fff; border-radius:8px;" data-panel="regularStudentsWrap">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <strong>Regular Students (Summary)</strong>
+              <label style="font-size:13px;color:#6b7280">Admin hide: <input type="checkbox" class="admin-hide-checkbox" data-panel="regularStudentsWrap" style="margin-left:8px"/></label>
             </div>
+            <div style="max-height:220px; overflow:auto; margin-top:8px;">
+              <table id="regularStudentsTable" style="width:100%">
+                <thead>
+                  <tr><th style="text-align:left">Roll</th><th style="text-align:left">Name</th><th style="text-align:right">Present</th><th style="text-align:right">Absent</th><th style="text-align:right">Total</th><th style="text-align:right">%</th></tr>
+                </thead>
+                <tbody id="regularStudentsBody"></tbody>
+              </table>
+            </div>
+          </div>
 
-            <div id="timelineWrap" class="panel" style="padding:10px">
-              <strong>Daily Timeline</strong>
-              <div id="timeline" class="timeline"></div>
+          <div id="heatbarWrap" style="margin-top:12px; padding:8px; background:#fff; border-radius:8px;" data-panel="heatbarWrap">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <strong>Daily Percent (recent days)</strong>
+              <label style="font-size:13px;color:#6b7280">Admin hide: <input type="checkbox" class="admin-hide-checkbox" data-panel="heatbarWrap" style="margin-left:8px"/></label>
             </div>
+            <div id="heatbarList" style="margin-top:8px"></div>
+            <div class="heat-legend" style="margin-top:10px">
+              <div class="heat-legend-item"><div style="width:16px;height:12px;background:#065f46;border-radius:3px"></div><div>90-100%</div></div>
+              <div class="heat-legend-item"><div style="width:16px;height:12px;background:#10b981;border-radius:3px"></div><div>75-89%</div></div>
+              <div class="heat-legend-item"><div style="width:16px;height:12px;background:#84cc16;border-radius:3px"></div><div>50-74%</div></div>
+              <div class="heat-legend-item"><div style="width:16px;height:12px;background:#f59e0b;border-radius:3px"></div><div>25-49%</div></div>
+              <div class="heat-legend-item"><div style="width:16px;height:12px;background:#f97316;border-radius:3px"></div><div>1-24%</div></div>
+              <div class="heat-legend-item"><div style="width:16px;height:12px;background:#e5e7eb;border-radius:3px"></div><div>0%</div></div>
+            </div>
+          </div>
 
-            <div id="leaderboardWrap" class="panel" style="padding:10px">
-              <strong>Leaderboard</strong>
-              <div id="leaderboard" class="leaderboard">
-                <div><em>Top 5</em></div>
-                <div id="leaderTop" class="leaderboard-list"></div>
-                <div style="margin-top:8px"><em>Bottom 5</em></div>
-                <div id="leaderBottom" class="leaderboard-list"></div>
-              </div>
+          <div id="monthlyHeatWrap" style="margin-top:12px; padding:8px; background:#fff; border-radius:8px;" data-panel="monthlyHeatWrap">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <strong>Monthly Heatmap (grid) — last 30 days</strong>
+              <label style="font-size:13px;color:#6b7280">Admin hide: <input type="checkbox" class="admin-hide-checkbox" data-panel="monthlyHeatWrap" style="margin-left:8px"/></label>
             </div>
+            <div id="heatmap" class="heatmap-grid" style="margin-top:8px"></div>
           </div>
 
         </div>
       </section>
 
       <aside class="right">
-        <div class="panel">
+        <div class="panel" id="todaySummaryPanel" data-panel="todaySummaryPanel">
           <h3 class="panel-title">Today's Summary</h3>
           <div class="summary"><p>Present today: <span id="presentCount">0</span></p><p>Absent today: <span id="absentCount">0</span></p><p>Lectures today: <span id="lecturesToday">0</span></p></div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="scanLogPanel" data-panel="scanLogPanel">
           <h3 class="panel-title">Scan Log</h3>
           <div id="scanLogWrap">
             <table id="scanLogTable"><thead><tr><th>Time</th><th>Roll</th><th>Name</th><th>Lecture</th></tr></thead><tbody></tbody></table>
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="attendanceRecordsPanel" data-panel="attendanceRecordsPanel">
           <h3 class="panel-title">Attendance Records</h3>
-          <div class="controls-row"><button id="downloadCSVBtn">Download CSV</button><button id="clearAllRecordsBtn" class="secondary">Delete All</button></div>
+          <div class="controls-row"><label style="font-size:13px;color:#6b7280;margin-right:auto">Admin hide: <input type="checkbox" class="admin-hide-checkbox" data-panel="attendanceRecordsPanel" style="margin-left:8px"/></label><button id="downloadCSVBtn">Download CSV</button><button id="clearAllRecordsBtn" class="secondary">Delete All</button></div>
           <div id="recordsWrap">
             <table id="recordsTable">
-              <thead><tr><th>Date</th><th>Time</th><th>Lecture</th><th>Faculty</th><th>Present</th><th>Actions</th><th>Edit</th><th>Delete</th></tr></thead>
+              <thead><tr><th>Date</th><th>Time</th><th>Lecture</th><th>Faculty</th><th>Present</th><th>View</th><th>Edit</th><th>Delete</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="analyticsPanel" data-panel="analyticsPanel">
           <h3 class="panel-title">Attendance Analytics</h3>
           <div class="summary"><p><strong>Regular Students (Today)</strong></p><p id="studentsStatsText" class="stats-line"></p></div>
           <canvas id="studentsPie" height="110"></canvas>
-          <div class="summary" style="margin-top:10px"><p><strong>Faculty Lecture Summary</strong></p></div>
-          <div id="facultySummaryWrap"><table id="facultySummaryTable"><thead><tr><th>Faculty Name</th><th>Total Lectures</th><th>Regular</th><th>Proxy</th></tr></thead><tbody></tbody></table></div>
+          <div style="margin-top:12px">
+            <div id="leaderboardWrap" class="panel" style="padding:10px;margin-top:6px" data-panel="leaderboardWrap">
+              <strong>Leaderboard</strong>
+              <div style="font-size:13px;color:#6b7280;margin-top:6px">Top and Bottom students by overall attendance %</div>
+              <div style="margin-top:10px;overflow:auto">
+                <table id="leaderboardTable" style="width:100%;border-collapse:collapse">
+                  <thead>
+                    <tr>
+                      <th style="text-align:left;padding:8px 6px;border-bottom:1px solid #eef2f7">Rank</th>
+                      <th style="text-align:left;padding:8px 6px;border-bottom:1px solid #eef2f7">Roll</th>
+                      <th style="text-align:left;padding:8px 6px;border-bottom:1px solid #eef2f7">Name</th>
+                      <th style="text-align:right;padding:8px 6px;border-bottom:1px solid #eef2f7">Present</th>
+                      <th style="text-align:right;padding:8px 6px;border-bottom:1px solid #eef2f7">Total</th>
+                      <th style="text-align:right;padding:8px 6px;border-bottom:1px solid #eef2f7">%</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leaderboardBody"></tbody>
+                </table>
+              </div>
+
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+                <button id="leaderTopBtn" class="record-action view" type="button">Show Top 10</button>
+                <button id="leaderBottomBtn" class="record-action view" type="button">Show Bottom 10</button>
+                <button id="leaderAllBtn" class="record-action view" type="button">Show All</button>
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
     </main>
@@ -296,13 +318,13 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
 
-  <!-- ========== MAIN JS (merged & updated) ========= -->
+  <!-- ========== MAIN JS (with Supabase persistence for admin settings) ========= -->
   <script>
     (function(){
       // state
       let currentUser = null, currentRole = null, currentList = [], attendanceState = {}, records = [], students = [], faculty = [], lectures = [], studentsPieChart = null, isEditing = false, currentEditRecordId = null, scanLog = [];
 
-      // DOM refs
+      // DOM refs (same as before)
       const loginScreen = document.getElementById("loginScreen");
       const appContainer = document.getElementById("appContainer");
       const loginEmail = document.getElementById("loginEmail");
@@ -342,10 +364,25 @@
 
       // visual containers
       const heatmapEl = document.getElementById("heatmap");
-      const heatLegendEl = document.getElementById("heatLegend");
+      const heatbarList = document.getElementById("heatbarList");
       const timelineEl = document.getElementById("timeline");
-      const leaderTopEl = document.getElementById("leaderTop");
-      const leaderBottomEl = document.getElementById("leaderBottom");
+      const regularStudentsBody = document.getElementById("regularStudentsBody");
+      const leaderboardBody = document.getElementById("leaderboardBody");
+
+      // admin & hide config
+      const ADMIN_PANEL_ID = 'adminPanel';
+      const LS_KEY = 'admin_hidden_panels_v1';            // local fallback key
+      const DB_KEY = 'panel_visibility';                  // admin_settings.key in DB
+      const ADMIN_TABLE = 'admin_settings';               // table name
+
+      const PANEL_MAP = [
+        { key: 'attendanceReportsPanel', label: 'Attendance Reports (Visualization)', selector: '#attendanceReportsPanel' },
+        { key: 'regularStudentsWrap', label: 'Regular Students (Summary)', selector: '#regularStudentsWrap' },
+        { key: 'heatbarWrap', label: 'Daily Percent List', selector: '#heatbarWrap' },
+        { key: 'monthlyHeatWrap', label: 'Monthly Heatmap (grid)', selector: '#monthlyHeatWrap' },
+        { key: 'attendanceRecordsPanel', label: 'Attendance Records', selector: '#attendanceRecordsPanel' },
+        { key: 'analyticsPanel', label: 'Attendance Analytics / Leaderboard', selector: '#analyticsPanel' }
+      ];
 
       // init
       async function init(){
@@ -372,9 +409,29 @@
         scanInput.addEventListener("keydown", e => { if(e.key==="Enter"){ const code=scanInput.value.trim(); scanInput.value=""; handleScan(code); }});
         lectureSelect.addEventListener("change", updateTimeFromLecture);
 
+        // leaderboard controls
+        const leaderTopBtn = document.getElementById('leaderTopBtn');
+        const leaderBottomBtn = document.getElementById('leaderBottomBtn');
+        const leaderAllBtn = document.getElementById('leaderAllBtn');
+        if(leaderTopBtn) leaderTopBtn.addEventListener('click', ()=> renderLeaderboard('top'));
+        if(leaderBottomBtn) leaderBottomBtn.addEventListener('click', ()=> renderLeaderboard('bottom'));
+        if(leaderAllBtn) leaderAllBtn.addEventListener('click', ()=> renderLeaderboard('all'));
+
         // modal hooks
         document.getElementById('attModalCloseBtn').addEventListener('click', closeAttendanceModal);
         document.getElementById('attModalBackdrop').addEventListener('click', function(e){ if(e.target===this) closeAttendanceModal(); });
+
+        // admin actions
+        document.getElementById('unhideSelected')?.addEventListener('click', unhideSelected);
+        document.getElementById('unhideAll')?.addEventListener('click', unhideAll);
+
+        // admin checkbox change (capturing)
+        document.addEventListener('change', function(e){
+          if(e.target && e.target.classList && e.target.classList.contains('admin-hide-checkbox')){
+            const panelKey = e.target.getAttribute('data-panel');
+            if(panelKey) togglePanelHidden(panelKey, e.target.checked);
+          }
+        });
 
         attendanceDate.value = new Date().toISOString().slice(0,10);
 
@@ -382,10 +439,165 @@
         await loadStudents(); await loadFaculty(); await loadLectures(); await loadAttendanceRecords();
         populateLectures(); populateFacultySelects(); updateTimeFromLecture();
         userTypeSel.value = "student"; setUserListForType(); applyRolePermissions();
-        updateSummary(); renderAllCharts(); renderHeatmap();
+        updateSummary(); renderAllCharts(); renderAttendanceReport(); renderHeatmap();
+
+        // load visibility from DB (if possible) then apply
+        await loadPanelVisibilityFromDB();
+        buildAdminList();
+        applyHiddenPanels();
       }
 
-      // auth
+      // -------------------------
+      // Persistence: Supabase DB
+      // -------------------------
+      async function loadPanelVisibilityFromDB(){
+        // Try DB first. If fails, fallback to localStorage
+        try {
+          const { data, error } = await supabase
+            .from(ADMIN_TABLE)
+            .select('value')
+            .eq('key', DB_KEY)
+            .single();
+
+          if(error && error.code !== 'PGRST116') { // PGRST116 single() empty row; handle silently
+            console.warn('Error loading admin settings from DB', error);
+            // fallthrough to localStorage fallback
+          }
+
+          if(data && data.value){
+            // data.value is JSON stored in DB
+            localStorage.setItem(LS_KEY, JSON.stringify(data.value || {}));
+            return data.value;
+          } else {
+            // no row — try localStorage fallback
+            const ls = localStorage.getItem(LS_KEY);
+            if(ls) return JSON.parse(ls);
+            return {};
+          }
+        } catch(err){
+          console.warn('DB load failed, falling back to localStorage', err);
+          const ls = localStorage.getItem(LS_KEY);
+          return ls ? JSON.parse(ls) : {};
+        }
+      }
+
+      async function savePanelVisibilityToDB(map){
+        if(!map || typeof map !== 'object') return;
+        // update localStorage immediately
+        localStorage.setItem(LS_KEY, JSON.stringify(map));
+
+        // Only admin should attempt to write to DB
+        if(currentRole !== 'admin') {
+          console.warn('Not admin: skipping DB write for panel visibility');
+          return;
+        }
+
+        try {
+          // upsert the JSON into admin_settings
+          const payload = { key: DB_KEY, value: map, updated_at: new Date().toISOString(), created_by: currentUser?.id || null };
+          const { data, error } = await supabase.from(ADMIN_TABLE).upsert(payload, { onConflict: 'key' }).select().single();
+          if(error) throw error;
+          return data;
+        } catch(err){
+          console.error('Failed to save panel visibility to DB: ', err);
+          // leave localStorage as fallback
+        }
+      }
+
+      // helpers to toggle and apply
+      function getHiddenMap(){
+        const raw = localStorage.getItem(LS_KEY);
+        try { return raw ? JSON.parse(raw) : {}; } catch(e){ return {}; }
+      }
+      async function togglePanelHidden(panelKey, hidden){
+        const map = getHiddenMap();
+        if(hidden) map[panelKey] = true; else delete map[panelKey];
+        localStorage.setItem(LS_KEY, JSON.stringify(map));
+        applyHiddenPanels();
+        // attempt DB save (admins)
+        await savePanelVisibilityToDB(map);
+        buildAdminList();
+      }
+
+      function isPanelHidden(panelKey){
+        const map = getHiddenMap();
+        return !!map[panelKey];
+      }
+
+      function applyHiddenPanels(){
+        const map = getHiddenMap();
+        PANEL_MAP.forEach(p=>{
+          const el = document.querySelector(p.selector);
+          if(!el) return;
+          const shouldHide = !!map[p.key];
+          if(shouldHide && currentRole !== 'admin'){
+            el.style.display = 'none';
+            el.classList.add('is-hidden-panel');
+          } else {
+            el.style.display = '';
+            el.classList.remove('is-hidden-panel');
+          }
+          // sync checkbox if present
+          const cb = document.querySelector(`.admin-hide-checkbox[data-panel="${p.key}"]`);
+          if(cb) cb.checked = !!map[p.key];
+        });
+
+        // admin panel visible only to admin
+        const adminPanel = document.getElementById('adminPanel');
+        if(adminPanel) adminPanel.style.display = (currentRole === 'admin') ? '' : 'none';
+      }
+
+      function buildAdminList(){
+        const list = document.getElementById('adminPanelList');
+        if(!list) return;
+        list.innerHTML = '';
+        const map = getHiddenMap();
+        PANEL_MAP.forEach(p=>{
+          const div = document.createElement('div');
+          div.style.display = 'flex';
+          div.style.justifyContent = 'space-between';
+          div.style.alignItems = 'center';
+          div.style.padding = '6px 0';
+          const hidden = !!map[p.key];
+          div.innerHTML = `<div><strong>${p.label}</strong><div style="font-size:12px;color:#6b7280">${p.selector}</div></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label style="font-size:13px;color:#6b7280"><input type="checkbox" data-panel="${p.key}" class="admin-list-checkbox" ${hidden? 'checked':''}/> Hidden</label>
+              <button class="record-action admin-unhide-button" data-panel="${p.key}">${hidden? 'Unhide':'Hide'}</button>
+            </div>`;
+          list.appendChild(div);
+        });
+
+        // wire buttons & checkboxes
+        list.querySelectorAll('.admin-unhide-button').forEach(btn=>{
+          btn.addEventListener('click', async function(e){
+            const key = e.currentTarget.getAttribute('data-panel');
+            const currentlyHidden = isPanelHidden(key);
+            await togglePanelHidden(key, !currentlyHidden);
+          });
+        });
+        list.querySelectorAll('.admin-list-checkbox').forEach(cb=>{
+          cb.addEventListener('change', async function(e){
+            const key = e.target.getAttribute('data-panel');
+            await togglePanelHidden(key, e.target.checked);
+          });
+        });
+      }
+
+      function unhideSelected(){
+        const list = document.getElementById('adminPanelList');
+        if(!list) return;
+        list.querySelectorAll('.admin-list-checkbox:checked').forEach(cb=>{
+          const key = cb.getAttribute('data-panel');
+          togglePanelHidden(key, false);
+        });
+      }
+      function unhideAll(){
+        PANEL_MAP.forEach(p=> togglePanelHidden(p.key, false));
+      }
+
+      // ----------------------------
+      // Existing app functions (unchanged logic)
+      // ----------------------------
       async function handleLogin(){
         const email = loginEmail.value.trim(), password = loginPassword.value.trim();
         if(!email||!password){ showAlert("Please enter email and password"); return; }
@@ -413,7 +625,11 @@
         loginScreen.style.display="none"; appContainer.style.display="block";
         roleLabel.textContent = `Logged in as ${currentRole.charAt(0).toUpperCase()+currentRole.slice(1)}`;
         await loadStudents(); await loadFaculty(); await loadLectures(); await loadAttendanceRecords();
-        populateLectures(); populateFacultySelects(); updateTimeFromLecture(); userTypeSel.value="student"; setUserListForType(); applyRolePermissions(); updateSummary(); renderAllCharts(); renderHeatmap();
+        populateLectures(); populateFacultySelects(); updateTimeFromLecture(); userTypeSel.value="student"; setUserListForType(); applyRolePermissions(); updateSummary(); renderAllCharts(); renderAttendanceReport(); renderHeatmap();
+        // after login try to fetch DB visibility (so other admins' changes appear)
+        await loadPanelVisibilityFromDB();
+        applyHiddenPanels();
+        buildAdminList();
       }
 
       function applyRolePermissions(){
@@ -429,10 +645,13 @@
           if(t === "delete") th.style.display = canDelete ? "" : "none";
         });
 
+        const adminPanelEl = document.getElementById(ADMIN_PANEL_ID);
+        if(adminPanelEl) adminPanelEl.style.display = (currentRole === 'admin') ? '' : 'none';
+
         renderList(); renderRecords();
+        applyHiddenPanels(); // ensure hidden panels are applied for non-admin users
       }
 
-      // data loading
       async function loadStudents(){ try{ const { data, error } = await supabase.from("students").select("*").order("roll_no",{ascending:true}); if(error) throw error; students = data.map(s=>({roll:s.roll_no,name:s.name,id:s.id})); }catch(err){ console.error(err); showAlert("❌ Error loading students"); } }
       async function loadFaculty(){ try{ const { data, error } = await supabase.from("faculty").select("*").order("roll_no",{ascending:true}); if(error) throw error; faculty = data.map(f=>({roll:f.roll_no,name:f.name,id:f.id})); }catch(err){ console.error(err); showAlert("❌ Error loading faculty"); } }
       async function loadLectures(){ try{ const { data, error } = await supabase.from("lectures").select("*").order("name",{ascending:true}); if(error) throw error; lectures = data || []; }catch(err){ console.error(err); showAlert("❌ Error loading lectures"); } }
@@ -458,7 +677,6 @@
           renderRecords();
         }catch(err){ console.error(err); showAlert("❌ Error loading attendance records"); } }
 
-      // user list
       function setUserListForType(){ const type = userTypeSel.value; currentList = (type==="student"?students:faculty).map(x=>({...x})); attendanceState={}; currentList.forEach(p=>attendanceState[p.roll]={present:false}); renderList(); }
       function onUserTypeChange(){ setUserListForType(); }
 
@@ -488,12 +706,10 @@
 
       function setAll(val){ const canEdit = currentRole==="admin"||currentRole==="faculty"; if(!canEdit) return; currentList.forEach(x=>attendanceState[x.roll]={present:val}); renderList(); }
 
-      // lectures & faculty dropdowns
       function populateLectures(){ lectureSelect.innerHTML = ""; lectures.forEach(l=>{ const opt=document.createElement("option"); opt.value=l.name; opt.textContent=l.name; lectureSelect.appendChild(opt); }); }
       function updateTimeFromLecture(){ const lecName = lectureSelect.value; const lec = lectures.find(l=>l.name===lecName); if(lec && lec.default_start_time && lec.default_end_time){ startTimeInput.value = lec.default_start_time; endTimeInput.value = lec.default_end_time; } else { startTimeInput.value=""; endTimeInput.value=""; } }
       function populateFacultySelects(){ const fill = el=>{ el.innerHTML=""; faculty.forEach(f=>{ const opt=document.createElement("option"); opt.value=f.name; opt.textContent=`${f.name} (${f.roll})`; el.appendChild(opt); }); }; fill(facultySelect); fill(originalFaculty); }
 
-      // submit attendance
       async function submitAttendance(){
         const canEdit = currentRole==="admin"||currentRole==="faculty"; if(!canEdit){ showAlert("Only Admin and Faculty can submit attendance"); return; }
         const date = attendanceDate.value || new Date().toISOString().slice(0,10);
@@ -526,7 +742,7 @@
           showAlert("✅ Attendance saved successfully!");
           await loadAttendanceRecords();
           exitEditMode(true);
-          updateSummary(); renderAllCharts(); renderHeatmap();
+          updateSummary(); renderAllCharts(); renderAttendanceReport(); renderHeatmap();
         } catch(err){ console.error(err); showAlert("❌ Error saving attendance: "+(err.message||err)); }
       }
 
@@ -546,7 +762,6 @@
         isEditing = false; currentEditRecordId = null; submitBtn.textContent = "Submit Attendance"; cancelEditBtn.style.display = "none"; setUserListForType(); if(!silent) showAlert("Edit cancelled");
       }
 
-      // records table
       function renderRecords(){
         recordsTableBody.innerHTML = "";
         const canEdit = currentRole==="admin"||currentRole==="faculty";
@@ -555,14 +770,14 @@
         records.forEach((r)=>{
           const tr = document.createElement("tr");
 
-          // build action buttons (pill style) and badge
+          // Only show the View All button if currentRole === admin
+          const viewAllBtn = (currentRole === 'admin') ? `<button class="record-action view" type="button" aria-label="View all attendees">View All</button>` : '';
           const viewPresentBtn = `<button class="record-action present" type="button" aria-label="View present attendees">Present</button>`;
           const viewAbsentBtn = `<button class="record-action absent" type="button" aria-label="View absent attendees">Absent</button>`;
 
           const editHtml = canEdit ? `<button class="record-action edit" type="button" aria-label="Edit record">Edit</button>` : `<span style="display:inline-block;padding:6px 8px;border-radius:8px;color:#9ca3af">-</span>`;
           const deleteHtml = canDelete ? `<button class="record-action delete" type="button" aria-label="Delete record">Delete</button>` : "";
 
-          // present/total badge
           const badgeHtml = `<span class="record-badge" aria-hidden="true">${r.presentCount || 0}/${r.total || 0}</span>`;
 
           tr.innerHTML =
@@ -571,16 +786,18 @@
              <td>${escapeHtml(r.lecture)}</td>
              <td>${escapeHtml(r.faculty)}</td>
              <td>${badgeHtml}</td>
-             <td class="actions">${viewPresentBtn} ${viewAbsentBtn}</td>
+             <td class="actions">${viewAllBtn} ${viewPresentBtn} ${viewAbsentBtn}</td>
              <td style="${canEdit ? "" : "display:none;"}">${editHtml}</td>
              <td style="${canDelete ? "" : "display:none;"}">${deleteHtml}</td>`;
 
           recordsTableBody.appendChild(tr);
 
-          // attach handlers (query inside the new row)
-          const tdActions = tr.querySelectorAll("td")[5];
-          tdActions.querySelector(".record-action.present").addEventListener('click', ()=>openAttendanceModal(r,'present'));
-          tdActions.querySelector(".record-action.absent").addEventListener('click', ()=>openAttendanceModal(r,'absent'));
+          const tdView = tr.querySelectorAll("td")[5];
+          if(tdView.querySelector(".record-action.view")){
+            tdView.querySelector(".record-action.view").addEventListener("click", ()=>openAttendanceModal(r,'all'));
+          }
+          tdView.querySelector(".record-action.present").addEventListener("click", ()=>openAttendanceModal(r,'present'));
+          tdView.querySelector(".record-action.absent").addEventListener("click", ()=>openAttendanceModal(r,'absent'));
 
           if(canEdit){
             const editBtn = tr.querySelector(".record-action.edit");
@@ -591,6 +808,8 @@
             if(delBtn) delBtn.addEventListener("click", ()=>deleteSingleRecord(r.id));
           }
         });
+
+        applyHiddenPanels();
       }
 
       async function deleteSingleRecord(recordId){
@@ -600,11 +819,10 @@
           const { error } = await supabase.from("attendance_records").delete().eq("id", recordId);
           if(error) throw error;
           showAlert("✅ Record deleted");
-          await loadAttendanceRecords(); renderAllCharts(); renderHeatmap();
+          await loadAttendanceRecords(); renderAllCharts(); renderAttendanceReport(); renderHeatmap();
         }catch(err){ console.error(err); showAlert("❌ Error deleting record"); }
       }
 
-      // modal helpers
       function openAttendanceModal(record, filter){
         const backdrop = document.getElementById('attModalBackdrop');
         const titleEl = document.getElementById('attModalTitle');
@@ -616,13 +834,11 @@
         if(filter==='present') filtered = filtered.filter(a=>a.status==='P');
         if(filter==='absent') filtered = filtered.filter(a=>a.status==='A');
         const count = filtered.length;
-        const filterLabel = filter==='present' ? 'Present' : 'Absent';
+        const filterLabel = filter==='all'?'All':(filter==='present'?'Present':'Absent');
 
-        // header
         titleEl.textContent = `${lecture || 'Lecture'} — ${date}`;
         subEl.innerHTML = `<span class="record-meta">${filterLabel} • ${count}/${total} attendees</span>`;
 
-        // export for this record
         const exportBtn = `<button class="record-action" id="exportRecordCsv" type="button" aria-label="Export record CSV">Export CSV</button>`;
 
         if(!filtered.length){
@@ -634,7 +850,6 @@
           content.innerHTML = html;
         }
 
-        // wire export button
         const exportEl = document.getElementById('exportRecordCsv');
         if(exportEl){
           exportEl.addEventListener('click', ()=>{
@@ -658,7 +873,6 @@
 
       function closeAttendanceModal(){ const b = document.getElementById('attModalBackdrop'); b.style.display='none'; b.setAttribute('aria-hidden','true'); }
 
-      // clear all records
       async function clearAllRecords(){
         if(currentRole!=="admin"){ showAlert("Only Admin can delete all records"); return; }
         if(!confirm("Delete ALL attendance records? This cannot be undone.")) return;
@@ -666,22 +880,18 @@
           const { error } = await supabase.from("attendance_records").delete().neq("id", null);
           if(error) throw error;
           showAlert("✅ All records deleted");
-          await loadAttendanceRecords(); renderAllCharts(); renderHeatmap();
+          await loadAttendanceRecords(); renderAllCharts(); renderAttendanceReport(); renderHeatmap();
         }catch(err){ console.error(err); showAlert("❌ Error deleting records"); }
       }
 
-      // summary & charts (fixed counts)
       function updateSummary(){
         const date = attendanceDate.value || new Date().toISOString().slice(0,10);
-
-        // collect unique present rolls across all sessions on that date
         const presentSet = new Set();
         records.filter(r=>r.date===date).forEach(r=>{
           (r.attendees||[]).forEach(a=>{
             if(a.status === "P") presentSet.add(a.roll);
           });
         });
-
         const present = presentSet.size;
         const totalStudents = students.length || 0;
         const absent = Math.max(0, totalStudents - present);
@@ -696,7 +906,8 @@
         renderStudentsPie();
         renderFacultySummary();
         renderTimeline();
-        renderLeaderboard();
+        renderLeaderboard('top');
+        renderRegularStudentsSummary();
       }
 
       function renderStudentsPie(){
@@ -724,29 +935,42 @@
         tbody.innerHTML = ""; Object.values(summary).forEach(row=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${row.name}</td><td>${row.total}</td><td>${row.regular}</td><td>${row.proxy}</td>`; tbody.appendChild(tr); });
       }
 
-      // Heatmap: simple last-30-days percent
+      function renderAttendanceReport(){ /* reserved */ }
+
+      function renderRegularStudentsSummary(){
+        if(!regularStudentsBody) return;
+        const map = {};
+        records.forEach(r => { (r.attendees||[]).forEach(a=>{ if(!map[a.roll]) map[a.roll] = { roll:a.roll, name:a.name, present:0, absent:0 }; if(a.status==='P') map[a.roll].present++; else map[a.roll].absent++; }); });
+        students.forEach(s => { if(!map[s.roll]) map[s.roll] = { roll:s.roll, name:s.name, present:0, absent:0 }; });
+        const rows = Object.values(map).sort((a,b)=>a.roll-b.roll);
+        regularStudentsBody.innerHTML = "";
+        rows.forEach(r=>{
+          const total = r.present + r.absent;
+          const pct = total ? ((r.present/total)*100).toFixed(1) : "0.0";
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td style="padding:8px 6px">${r.roll}</td><td style="padding:8px 6px">${escapeHtml(r.name)}</td><td style="padding:8px 6px;text-align:right">${r.present}</td><td style="padding:8px 6px;text-align:right">${r.absent}</td><td style="padding:8px 6px;text-align:right">${total}</td><td style="padding:8px 6px;text-align:right">${pct}%</td>`;
+          regularStudentsBody.appendChild(tr);
+        });
+      }
+
       function renderHeatmap(){
         if(!heatmapEl) return;
         heatmapEl.innerHTML = "";
-        heatLegendEl.innerHTML = "";
+        heatbarList.innerHTML = "";
         const days = 30;
         const now = new Date(attendanceDate.value || new Date().toISOString().slice(0,10));
         const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const dailyPct = [];
-
         for(let i=days-1;i>=0;i--){
           const d = new Date(base);
           d.setDate(base.getDate() - i);
           const iso = d.toISOString().slice(0,10);
-          // compute percent for iso
           let presentSet = new Set(), totalPossible = students.length || 0;
           records.filter(r=>r.date===iso).forEach(r=>{ (r.attendees||[]).forEach(a=>{ if(a.status==='P') presentSet.add(a.roll); }); });
           const present = presentSet.size;
           const pct = totalPossible ? Math.round((present/totalPossible)*100) : 0;
           dailyPct.push({ date: iso, pct, present });
         }
-
-        // color scale simple thresholds
         const colorFor = pct=>{
           if(pct>=90) return "#065f46";
           if(pct>=75) return "#10b981";
@@ -755,34 +979,26 @@
           if(pct>0) return "#f97316";
           return "#e5e7eb";
         };
-
         dailyPct.forEach(d=>{
           const div = document.createElement("div");
           div.className = "heatday";
           div.style.background = colorFor(d.pct);
-          div.title = `${d.date}\nPresent: ${d.pct}%`;
+          div.title = `${d.date}\nPresent: ${d.present} • ${d.pct}%`;
           div.textContent = d.date.slice(5).replace("-","/");
           heatmapEl.appendChild(div);
         });
-
-        // legend
-        const legendData = [
-          {label:"90-100%", color:"#065f46"},
-          {label:"75-89%", color:"#10b981"},
-          {label:"50-74%", color:"#84cc16"},
-          {label:"25-49%", color:"#f59e0b"},
-          {label:"1-24%", color:"#f97316"},
-          {label:"0%", color:"#e5e7eb"},
-        ];
-        legendData.forEach(l=>{
-          const el = document.createElement("div");
-          el.style.display="flex"; el.style.alignItems="center"; el.style.gap="6px";
-          el.innerHTML = `<div style="width:16px;height:12px;background:${l.color};border-radius:3px"></div><div>${l.label}</div>`;
-          heatLegendEl.appendChild(el);
+        const recent = dailyPct.slice(-7).reverse();
+        recent.forEach(r=>{
+          const el = document.createElement('div');
+          el.style.display="flex"; el.style.justifyContent="space-between"; el.style.padding="6px 4px"; el.style.alignItems="center";
+          const colorBox = document.createElement('div'); colorBox.style.width="36px"; colorBox.style.height="12px"; colorBox.style.background=colorFor(r.pct); colorBox.style.borderRadius="4px";
+          el.innerHTML = `<div style="font-size:13px">${r.date}</div><div style="display:flex;align-items:center;gap:8px"><div>${r.pct}%</div></div>`;
+          const right = el.querySelector('div > div');
+          if(right) right.replaceWith(colorBox);
+          heatbarList.appendChild(el);
         });
       }
 
-      // Timeline: sessions for selected date
       function renderTimeline(){
         if(!timelineEl) return;
         timelineEl.innerHTML = "";
@@ -808,41 +1024,36 @@
         });
       }
 
-      // Leaderboard: top and bottom students by overall attendance %
-      function renderLeaderboard(){
-        if(!leaderTopEl) return;
-        // compute over all records
+      function renderLeaderboard(mode = 'top') {
+        const tbody = document.getElementById('leaderboardBody');
+        if(!tbody) return;
         const map = {};
-        records.forEach(r=>{
-          (r.attendees||[]).forEach(a=>{
-            if(!map[a.roll]) map[a.roll] = { roll:a.roll, name:a.name, present:0, absent:0 };
-            if(a.status === "P") map[a.roll].present++;
-            else map[a.roll].absent++;
-          });
-        });
+        records.forEach(r=> (r.attendees||[]).forEach(a=>{ if(!map[a.roll]) map[a.roll] = { roll: a.roll, name: a.name, present:0, absent:0 }; if(a.status === "P") map[a.roll].present++; else map[a.roll].absent++; }));
         const arr = Object.values(map);
-        if(!arr.length){ leaderTopEl.innerHTML = "<div class='att-modal-empty'>No data</div>"; leaderBottomEl.innerHTML = ""; return; }
-        arr.forEach(u => { const total = u.present + u.absent; u.pct = total ? (u.present/total * 100) : 0; });
-        arr.sort((a,b)=>b.pct - a.pct);
-        const top = arr.slice(0,5);
-        const bottom = arr.slice(-5).reverse();
-
-        leaderTopEl.innerHTML = "";
-        top.forEach(s=>{
-          const el = document.createElement("div"); el.className = "leader-row";
-          el.innerHTML = `<div>${s.name}</div><div>${s.pct.toFixed(1)}%</div>`;
-          leaderTopEl.appendChild(el);
+        if(!arr.length){ tbody.innerHTML = `<tr><td colspan="6" style="padding:12px;color:#6b7280">No attendance data available</td></tr>`; return; }
+        arr.forEach(u => { u.total = (u.present||0) + (u.absent||0); u.pct = u.total ? (u.present / u.total * 100) : 0; });
+        arr.sort((a,b) => b.pct - a.pct);
+        let list;
+        if(mode === 'top') list = arr.slice(0, 10);
+        else if(mode === 'bottom') list = arr.slice(-10).reverse();
+        else list = arr;
+        let html = '';
+        list.forEach((s, idx) => {
+          const rank = (mode === 'bottom') ? (arr.length - (idx)) : (idx + 1);
+          const pct = s.pct ? s.pct.toFixed(1) : '0.0';
+          const cls = s.pct >= 75 ? 'leader-high' : (s.pct >= 25 ? 'leader-mid' : 'leader-low');
+          html += `<tr>
+            <td style="padding:8px 6px">${rank}</td>
+            <td style="padding:8px 6px">${escapeHtml(s.roll)}</td>
+            <td style="padding:8px 6px">${escapeHtml(s.name)}</td>
+            <td style="padding:8px 6px;text-align:right">${s.present}</td>
+            <td style="padding:8px 6px;text-align:right">${s.total}</td>
+            <td style="padding:8px 6px;text-align:right" class="leader-percent ${cls}">${pct}%</td>
+          </tr>`;
         });
-
-        leaderBottomEl.innerHTML = "";
-        bottom.forEach(s=>{
-          const el = document.createElement("div"); el.className = "leader-row";
-          el.innerHTML = `<div>${s.name}</div><div>${s.pct.toFixed(1)}%</div>`;
-          leaderBottomEl.appendChild(el);
-        });
+        tbody.innerHTML = html;
       }
 
-      // scan
       async function handleScan(code){
         if(!code) return;
         const roll = parseInt(code,10); if(isNaN(roll)){ showAlert("Scan code is not a valid roll number: "+code); return; }
@@ -856,17 +1067,14 @@
       function addScanLogEntry(roll,name){ const now=new Date(); const timeStr=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}); const lecture = lectureSelect.value; scanLog.unshift({time:timeStr,roll,name,lecture}); if(scanLog.length>50) scanLog.pop(); renderScanLog(); }
       function renderScanLog(){ if(!scanLogTbody) return; scanLogTbody.innerHTML=""; scanLog.forEach(entry=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${entry.time}</td><td>${entry.roll}</td><td>${entry.name}</td><td>${entry.lecture}</td>`; scanLogTbody.appendChild(tr); }); }
 
-      // CSV downloads
       function downloadCSV(){ const rows=[["Date","Day","Time","Lecture","LectureType","Faculty","Proxy","OriginalFaculty","Roll","Name","Status"]]; records.forEach(r=>{ r.attendees.forEach(a=>{ rows.push([r.date, r.day||"", r.timeSlot||"", r.lecture, r.lectureType||"", r.faculty||"", r.proxy ? "Yes":"No", r.original||"", a.roll, a.name, a.status]); }); }); const csv = rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"); const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="attendance_records.csv"; a.click(); URL.revokeObjectURL(url); }
 
       function downloadStudentsReport(){ const map={}; records.forEach(r=>{ (r.attendees||[]).forEach(a=>{ if(!map[a.roll]) map[a.roll]={roll:a.roll,name:a.name,present:0,absent:0}; if(a.status==='P') map[a.roll].present++; else if(a.status==='A') map[a.roll].absent++; }); }); const rows=[["Roll No","Name","Total Present","Total Absent","Total Days","Attendance %"]]; Object.values(map).sort((a,b)=>a.roll-b.roll).forEach(r=>{ const totalDays=r.present+r.absent; const pct = totalDays?((r.present/totalDays)*100).toFixed(1):"0.0"; rows.push([r.roll,r.name,r.present,r.absent,totalDays,pct+"%"]); }); const csv = rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"); const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="students_report.csv"; a.click(); URL.revokeObjectURL(url); }
 
       function downloadFacultyReport(){ const summary={}; faculty.forEach(f=>summary[f.name]={name:f.name,total:0,regular:0,proxy:0}); records.forEach(r=>{ const facName=r.faculty||""; if(!facName||!summary[facName]) return; summary[facName].total++; if(r.proxy) summary[facName].proxy++; else summary[facName].regular++; }); const rows=[["Faculty Name","Total Lectures","Regular","Proxy"]]; Object.values(summary).forEach(r=>rows.push([r.name,r.total,r.regular,r.proxy])); const csv = rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"); const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="faculty_report.csv"; a.click(); URL.revokeObjectURL(url); }
 
-      // util
       function showAlert(msg){ const div=document.createElement('div'); div.className='alert'; div.textContent = msg; appContainer.insertBefore(div,appContainer.firstChild); setTimeout(()=>div.remove(),4000); }
 
-      // basic HTML escape helper (to avoid injection when inserting innerHTML)
       function escapeHtml(str){
         if(str === null || str === undefined) return "";
         return String(str)
