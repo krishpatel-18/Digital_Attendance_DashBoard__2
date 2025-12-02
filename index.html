@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TYBCA Attendance Dashboard - Supabase</title>
   <style>
-    :root{--panel:#ffffff;--accent:#0f9d58;--muted:#6b7280;}
+    :root{--panel:#ffffff;--accent:#0f9d58;--muted:#6b7280}
     .theme-login{--bg:radial-gradient(circle at top left,#7b2ff7,#5a2fd6,#5826c4,#7520b7,#9121b4,#b623b5,#d72ab8);}
-    .theme-main{--bg:radial-gradient(circle at top left,#7b2ff7,#5a2fd6,#5826c4,#7520b7,#9121b4,#b623b5,#d72ab8);--accent:#0077ff;}
+    .theme-main{--bg:radial-gradient(circle at top left,#7b2ff7,#5a2fd6,#5826c4,#7520b7,#9121b4,#b623b5,#d72ab8);--accent:#0077ff}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:#111827;min-height:100vh;padding:16px;transition:background 0.4s ease;}
-    .login-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center;}
-    .login-card{width:100%;max-width:420px;background:#ffffff;border-radius:24px;box-shadow:0 18px 45px rgba(15,23,42,0.25);padding:24px 22px 20px;}
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:#111827;min-height:100vh;padding:16px;transition:background 0.4s ease}
+    .login-wrapper{min-height:100vh;display:flex;align-items:center;justify-content:center}
+    .login-card{width:100%;max-width:420px;background:#ffffff;border-radius:24px;box-shadow:0 18px 45px rgba(15,23,42,0.25);padding:24px 22px 20px}
     .login-header{text-align:center;margin-bottom:16px}
     .login-header h1{font-size:22px;margin-top:6px;margin-bottom:4px}
     .login-header p{font-size:14px;color:var(--muted)}
@@ -41,7 +41,7 @@
     #facultySummaryWrap{max-height:200px;overflow:auto;margin-top:6px}
     .form-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px}
     .form-row label{min-width:80px;color:#4b5563}
-    input[type="text"],select,input[type="time"],input[type="email"],input[type="password"]{padding:6px 8px;border-radius:8px;border:1px solid #e5e7eb;font-size:13px}
+    input[type="text"],select,input[type="time"],input[type="email"],input[type="password"],input[type="number"]{padding:6px 8px;border-radius:8px;border:1px solid #e5e7eb;font-size:13px}
     button{background:var(--accent);color:#fff;padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:5px}
     button.secondary{background:#fff;color:#111827;border:1px solid #e5e7eb}
     button.download-btn-primary{background:#16a34a}
@@ -52,8 +52,6 @@
     footer{text-align:center;margin-top:12px;font-size:11px;color:#e5e7eb}
     .alert{padding:9px 10px;margin-top:8px;background:#e6fffa;border-radius:10px;color:#065f46;font-size:13px;box-shadow:0 2px 6px rgba(16,185,129,0.25)}
     @media(max-width:900px){main{flex-direction:column}header{flex-direction:column;align-items:flex-start;gap:6px} .top-right{align-items:flex-start} .top-controls{justify-content:flex-start} #usersTableWrap{max-height:260px}}
-
-    /* Modal + UX */
     .att-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:1100}
     .att-modal{width:calc(100% - 40px);max-width:760px;background:#fff;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(2,6,23,0.35);max-height:80vh;overflow:auto}
     .att-modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -69,7 +67,6 @@
     .record-action.absent { background:#fff7ed; color:#7c2d12; border-color:#f97316; }
     .record-action.edit { background:#eef2ff; color:#3730a3; border-color:#a78bfa; }
     .record-action.delete { background:#fff1f2; color:#991b1b; border-color:#fca5a5; }
-
     .record-badge { display:inline-block; min-width:40px; padding:6px 10px; border-radius:999px; text-align:center; font-weight:700; background:linear-gradient(90deg,#f8fafc,#fff); color:#111827; border:1px solid #e6eef8; font-size:13px; }
     #recordsTable td .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
     #leaderboardTable thead th { font-weight:700; background:#fafafa; font-size:13px; }
@@ -80,6 +77,11 @@
     .heatmap-grid{display:grid;grid-template-columns: repeat(7, 1fr); gap:6px; padding:8px}
     .heatday{height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#0b1220;background:#e5e7eb}
     .heat-legend{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;flex-wrap:wrap}
+    /* admin panel */
+    #adminPanel{display:none;margin-bottom:12px}
+    .admin-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .admin-list{margin-top:8px;padding:10px;background:#fff;border-radius:8px}
+    .is-hidden-panel{opacity:0.45}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -159,30 +161,9 @@
           <div class="form-row"><button id="submitAttendanceBtn">Submit Attendance</button><button id="cancelEditBtn" class="secondary" style="display:none">Cancel Edit</button></div>
         </div>
 
-        <!-- Reports panel -->
-        <div id="attendanceReportsPanel" class="panel">
-          <h3 class="panel-title">Attendance Reports (Visualization)</h3>
-          <div class="controls-row">
-            <button id="downloadStudentsReportCsv" class="download-btn-primary">Download Students CSV</button>
-            <button id="downloadFacultyReportCsv" class="download-btn-primary">Download Faculty CSV</button>
-          </div>
+        <!-- Removed: Attendance Reports (Visualization) as requested -->
 
-          <div id="regularStudentsWrap" style="margin-top:8px; padding:8px; background:#fff; border-radius:8px;">
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <strong>Regular Students (Summary)</strong>
-            </div>
-            <div style="max-height:220px; overflow:auto; margin-top:8px;">
-              <table id="regularStudentsTable" style="width:100%">
-                <thead>
-                  <tr><th style="text-align:left">Roll</th><th style="text-align:left">Name</th><th style="text-align:right">Present</th><th style="text-align:right">Absent</th><th style="text-align:right">Total</th><th style="text-align:right">%</th></tr>
-                </thead>
-                <tbody id="regularStudentsBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div id="dailyPercentPanel" class="panel">
+        <div id="dailyPercentPanel" class="panel" data-panel="dailyPercentPanel">
           <h3 class="panel-title">Daily Percent (recent days)</h3>
           <div id="heatbarList" style="margin-top:8px"></div>
           <div class="heat-legend" style="margin-top:10px">
@@ -195,27 +176,38 @@
           </div>
         </div>
 
-        <div id="monthlyHeatPanel" class="panel">
+        <div id="monthlyHeatPanel" class="panel" data-panel="monthlyHeatPanel">
           <h3 class="panel-title">Monthly Heatmap (grid) — last 30 days</h3>
           <div id="heatmap" class="heatmap-grid" style="margin-top:8px"></div>
         </div>
       </section>
 
       <aside class="right">
-        <!-- Today's summary -->
-        <div class="panel" id="todaySummaryPanel">
+        <!-- Admin Panel (admin-only) -->
+        <div id="adminPanel" class="panel" aria-hidden="true">
+          <h3 class="panel-title">Admin Controls (show/hide panels)</h3>
+          <div class="admin-list" id="adminPanelList">
+            <!-- populated by JS for each panel -->
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button id="savePanelVisibilityBtn" class="record-action">Save</button>
+            <button id="resetPanelVisibilityBtn" class="record-action">Reset</button>
+          </div>
+        </div>
+
+        <div class="panel" id="todaySummaryPanel" data-panel="todaySummaryPanel">
           <h3 class="panel-title">Today's Summary</h3>
           <div class="summary"><p>Present today: <span id="presentCount">0</span></p><p>Absent today: <span id="absentCount">0</span></p><p>Lectures today: <span id="lecturesToday">0</span></p></div>
         </div>
 
-        <div class="panel" id="scanLogPanel">
+        <div class="panel" id="scanLogPanel" data-panel="scanLogPanel">
           <h3 class="panel-title">Scan Log</h3>
           <div id="scanLogWrap">
             <table id="scanLogTable"><thead><tr><th>Time</th><th>Roll</th><th>Name</th><th>Lecture</th></tr></thead><tbody></tbody></table>
           </div>
         </div>
 
-        <div class="panel" id="attendanceRecordsPanel">
+        <div class="panel" id="attendanceRecordsPanel" data-panel="attendanceRecordsPanel">
           <h3 class="panel-title">Attendance Records</h3>
           <div class="controls-row"><button id="downloadCSVBtn">Download CSV</button><button id="clearAllRecordsBtn" class="secondary">Delete All</button></div>
           <div id="recordsWrap">
@@ -226,15 +218,13 @@
           </div>
         </div>
 
-        <!-- Attendance Analytics (pie + Regular Students Today) -->
-        <div class="panel" id="analyticsPanel">
+        <div class="panel" id="analyticsPanel" data-panel="analyticsPanel">
           <h3 class="panel-title">Attendance Analytics</h3>
           <div class="summary"><p><strong>Regular Students (Today)</strong></p><p id="studentsStatsText" class="stats-line"></p></div>
           <canvas id="studentsPie" height="110"></canvas>
         </div>
 
-        <!-- Leaderboard moved to its own panel -->
-        <div class="panel" id="leaderboardPanel">
+        <div class="panel" id="leaderboardPanel" data-panel="leaderboardPanel">
           <h3 class="panel-title">Leaderboard</h3>
           <div style="font-size:13px;color:#6b7280;margin-top:6px">Top and Bottom students by overall attendance %</div>
           <div style="margin-top:10px;overflow:auto">
@@ -252,7 +242,6 @@
               <tbody id="leaderboardBody"></tbody>
             </table>
           </div>
-
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
             <button id="leaderTopBtn" class="record-action view" type="button">Show Top 10</button>
             <button id="leaderBottomBtn" class="record-action view" type="button">Show Bottom 10</button>
@@ -290,7 +279,7 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
 
-  <!-- ========== MAIN JS (keeps functionality; leaderboard moved in DOM only) ========= -->
+  <!-- ========== MAIN JS (with admin visibility controls) ========= -->
   <script>
     (function(){
       // state
@@ -341,6 +330,22 @@
       const regularStudentsBody = document.getElementById("regularStudentsBody");
       const leaderboardBody = document.getElementById("leaderboardBody");
 
+      // admin refs
+      const adminPanel = document.getElementById('adminPanel');
+      const adminPanelList = document.getElementById('adminPanelList');
+      const SAVE_KEY = 'tybca_panel_visibility_v1';
+
+      // panels we allow admins to toggle
+      const TOGGLE_PANELS = [
+        { key: 'todaySummaryPanel', label: 'Today Summary', selector: '#todaySummaryPanel' },
+        { key: 'scanLogPanel', label: 'Scan Log', selector: '#scanLogPanel' },
+        { key: 'attendanceRecordsPanel', label: 'Attendance Records', selector: '#attendanceRecordsPanel' },
+        { key: 'analyticsPanel', label: 'Attendance Analytics (pie)', selector: '#analyticsPanel' },
+        { key: 'leaderboardPanel', label: 'Leaderboard', selector: '#leaderboardPanel' },
+        { key: 'dailyPercentPanel', label: 'Daily Percent (recent days)', selector: '#dailyPercentPanel' },
+        { key: 'monthlyHeatPanel', label: 'Monthly Heatmap (30d)', selector: '#monthlyHeatPanel' }
+      ];
+
       // init
       async function init(){
         try {
@@ -370,6 +375,7 @@
         scanInput.addEventListener("keydown", e => { if(e.key==="Enter"){ const code=scanInput.value.trim(); scanInput.value=""; handleScan(code); }});
         lectureSelect.addEventListener("change", updateTimeFromLecture);
 
+        // leaderboard controls
         const leaderTopBtn = document.getElementById('leaderTopBtn');
         const leaderBottomBtn = document.getElementById('leaderBottomBtn');
         const leaderAllBtn = document.getElementById('leaderAllBtn');
@@ -377,8 +383,13 @@
         if(leaderBottomBtn) leaderBottomBtn.addEventListener('click', ()=> renderLeaderboard('bottom'));
         if(leaderAllBtn) leaderAllBtn.addEventListener('click', ()=> renderLeaderboard('all'));
 
+        // modal hooks
         document.getElementById('attModalCloseBtn').addEventListener('click', closeAttendanceModal);
         document.getElementById('attModalBackdrop').addEventListener('click', function(e){ if(e.target===this) closeAttendanceModal(); });
+
+        // admin panel save/reset
+        document.getElementById('savePanelVisibilityBtn')?.addEventListener('click', savePanelVisibilityFromUI);
+        document.getElementById('resetPanelVisibilityBtn')?.addEventListener('click', resetPanelVisibility);
 
         attendanceDate.value = new Date().toISOString().slice(0,10);
 
@@ -387,6 +398,10 @@
         populateLectures(); populateFacultySelects(); updateTimeFromLecture();
         userTypeSel.value = "student"; setUserListForType(); applyRolePermissions();
         updateSummary(); renderAllCharts(); renderHeatmap();
+
+        // build admin UI and apply saved visibility
+        buildAdminList();
+        applySavedVisibility();
       }
 
       // ----------------------------
@@ -406,10 +421,10 @@
 
       async function handleSessionUser(user){
         try{
-          // load role from users table (if exists)
+          // try to load role from users table; fallback to token role or 'student'
           const { data: userData, error } = await supabase.from("users").select("role, full_name").eq("id", user.id).maybeSingle();
           currentUser = user;
-          currentRole = (userData && userData.role) ? userData.role : "student";
+          currentRole = (userData && userData.role) ? userData.role : (user.role || "student");
           await enterApp();
         }catch(err){ console.error(err); showAlert("❌ Error loading user data"); }
       }
@@ -427,6 +442,8 @@
         roleLabel.textContent = `Logged in as ${currentRole.charAt(0).toUpperCase()+currentRole.slice(1)}`;
         await loadStudents(); await loadFaculty(); await loadLectures(); await loadAttendanceRecords();
         populateLectures(); populateFacultySelects(); updateTimeFromLecture(); userTypeSel.value="student"; setUserListForType(); applyRolePermissions(); updateSummary(); renderAllCharts(); renderHeatmap();
+        buildAdminList();
+        applySavedVisibility();
       }
 
       function applyRolePermissions(){
@@ -441,6 +458,9 @@
           if(t === "edit") th.style.display = canEdit ? "" : "none";
           if(t === "delete") th.style.display = canDelete ? "" : "none";
         });
+
+        // admin panel visibility
+        if(adminPanel) adminPanel.style.display = (currentRole === 'admin') ? '' : 'none';
 
         renderList(); renderRecords();
       }
@@ -509,7 +529,6 @@
       function updateTimeFromLecture(){ const lecName = lectureSelect.value; const lec = lectures.find(l=>l.name===lecName); if(lec && lec.default_start_time && lec.default_end_time){ startTimeInput.value = lec.default_start_time; endTimeInput.value = lec.default_end_time; } else { startTimeInput.value=""; endTimeInput.value=""; } }
       function populateFacultySelects(){ const fill = el=>{ el.innerHTML=""; faculty.forEach(f=>{ const opt=document.createElement("option"); opt.value=f.name; opt.textContent=`${f.name} (${f.roll})`; el.appendChild(opt); }); }; fill(facultySelect); fill(originalFaculty); }
 
-      // submitAttendance
       async function submitAttendance(){
         const canEdit = currentRole==="admin"||currentRole==="faculty"; if(!canEdit){ showAlert("Only Admin and Faculty can submit attendance"); return; }
         const date = attendanceDate.value || new Date().toISOString().slice(0,10);
@@ -607,6 +626,8 @@
             if(delBtn) delBtn.addEventListener("click", ()=>deleteSingleRecord(r.id));
           }
         });
+
+        applySavedVisibility(); // re-apply visibility to reflect any changes
       }
 
       async function deleteSingleRecord(recordId){
@@ -738,13 +759,13 @@
         records.forEach(r => { (r.attendees||[]).forEach(a=>{ if(!map[a.roll]) map[a.roll] = { roll:a.roll, name:a.name, present:0, absent:0 }; if(a.status==='P') map[a.roll].present++; else map[a.roll].absent++; }); });
         students.forEach(s => { if(!map[s.roll]) map[s.roll] = { roll:s.roll, name:s.name, present:0, absent:0 }; });
         const rows = Object.values(map).sort((a,b)=>a.roll-b.roll);
-        regularStudentsBody.innerHTML = "";
+        regularStudentsBody && (regularStudentsBody.innerHTML = "");
         rows.forEach(r=>{
           const total = r.present + r.absent;
           const pct = total ? ((r.present/total)*100).toFixed(1) : "0.0";
           const tr = document.createElement('tr');
           tr.innerHTML = `<td style="padding:8px 6px">${r.roll}</td><td style="padding:8px 6px">${escapeHtml(r.name)}</td><td style="padding:8px 6px;text-align:right">${r.present}</td><td style="padding:8px 6px;text-align:right">${r.absent}</td><td style="padding:8px 6px;text-align:right">${total}</td><td style="padding:8px 6px;text-align:right">${pct}%</td>`;
-          regularStudentsBody.appendChild(tr);
+          regularStudentsBody && regularStudentsBody.appendChild(tr);
         });
       }
 
@@ -878,6 +899,86 @@
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
+      }
+
+      // ----------------------------
+      // Admin panel UI & persistence
+      // ----------------------------
+      function buildAdminList(){
+        if(!adminPanelList) return;
+        adminPanelList.innerHTML = '';
+        TOGGLE_PANELS.forEach(p=>{
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.alignItems = 'center';
+          row.style.justifyContent = 'space-between';
+          row.style.marginBottom = '8px';
+          const left = document.createElement('div');
+          left.innerHTML = `<strong style="display:block">${p.label}</strong><div style="font-size:12px;color:#6b7280">${p.selector}</div>`;
+          const right = document.createElement('div');
+          right.innerHTML = `<label style="font-size:13px;color:#6b7280"><input type="checkbox" data-panel="${p.key}" class="admin-panel-checkbox" /> Visible</label>`;
+          row.appendChild(left);
+          row.appendChild(right);
+          adminPanelList.appendChild(row);
+        });
+
+        // set checkbox states from saved settings
+        const saved = getSavedVisibility();
+        adminPanelList.querySelectorAll('.admin-panel-checkbox').forEach(cb=>{
+          const key = cb.getAttribute('data-panel');
+          cb.checked = (saved[key] === undefined) ? true : !!saved[key];
+          cb.addEventListener('change', ()=> {
+            // reflect immediately to UI
+            const panel = TOGGLE_PANELS.find(pp=>pp.key === key);
+            if(panel){
+              const el = document.querySelector(panel.selector);
+              if(el) el.style.display = cb.checked ? '' : 'none';
+            }
+          });
+        });
+
+        // admin panel visibility depends on role
+        if(adminPanel) adminPanel.style.display = (currentRole === 'admin') ? '' : 'none';
+      }
+
+      function getSavedVisibility(){
+        try {
+          const raw = localStorage.getItem(SAVE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch(e){
+          return {};
+        }
+      }
+
+      function savePanelVisibilityFromUI(){
+        const map = {};
+        adminPanelList.querySelectorAll('.admin-panel-checkbox').forEach(cb=>{
+          const key = cb.getAttribute('data-panel');
+          map[key] = !!cb.checked;
+        });
+        try { localStorage.setItem(SAVE_KEY, JSON.stringify(map)); showAlert('✅ Panel visibility saved'); } catch(e){ console.warn(e); showAlert('Failed to save visibility'); }
+      }
+
+      function resetPanelVisibility(){
+        try {
+          localStorage.removeItem(SAVE_KEY);
+          buildAdminList();
+          applySavedVisibility();
+          showAlert('Reset to defaults');
+        } catch(e){ console.warn(e); showAlert('Reset failed'); }
+      }
+
+      function applySavedVisibility(){
+        const saved = getSavedVisibility();
+        TOGGLE_PANELS.forEach(p => {
+          const el = document.querySelector(p.selector);
+          if(!el) return;
+          // default visible if not set
+          const visible = (saved[p.key] === undefined) ? true : !!saved[p.key];
+          el.style.display = visible ? '' : 'none';
+        });
+        // admin panel visible only for admin role
+        if(adminPanel) adminPanel.style.display = (currentRole === 'admin') ? '' : 'none';
       }
 
       // start
