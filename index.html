@@ -52,6 +52,8 @@
     footer{text-align:center;margin-top:12px;font-size:11px;color:#e5e7eb}
     .alert{padding:9px 10px;margin-top:8px;background:#e6fffa;border-radius:10px;color:#065f46;font-size:13px;box-shadow:0 2px 6px rgba(16,185,129,0.25)}
     @media(max-width:900px){main{flex-direction:column}header{flex-direction:column;align-items:flex-start;gap:6px} .top-right{align-items:flex-start} .top-controls{justify-content:flex-start} #usersTableWrap{max-height:260px}}
+    
+    /* Modal */
     .att-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:1100}
     .att-modal{width:calc(100% - 40px);max-width:760px;background:#fff;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(2,6,23,0.35);max-height:80vh;overflow:auto}
     .att-modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
@@ -62,13 +64,17 @@
     .att-modal-list table{width:100%;border-collapse:collapse}
     .att-modal-list th,.att-modal-list td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
     .att-modal-empty{padding:18px;text-align:center;color:#6b7280}
+    
+    /* Action Buttons */
     .record-action { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#111827; font-size:13px; cursor:pointer; box-shadow:0 1px 0 rgba(0,0,0,0.03); }
     .record-action.present { background:#ecfdf5; color:#065f46; border-color:#10b981; }
-    .record-action.absent { background:#fff7ed; color:#7c2d12; border-color:#f97316; }
+    .record-action.view { background:#f0f9ff; color:#0369a1; border-color:#0ea5e9; }
     .record-action.edit { background:#eef2ff; color:#3730a3; border-color:#a78bfa; }
     .record-action.delete { background:#fff1f2; color:#991b1b; border-color:#fca5a5; }
     .record-badge { display:inline-block; min-width:40px; padding:6px 10px; border-radius:999px; text-align:center; font-weight:700; background:linear-gradient(90deg,#f8fafc,#fff); color:#111827; border:1px solid #e6eef8; font-size:13px; }
     #recordsTable td .actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    
+    /* Heatmap & KPI */
     .heatmap-grid{display:grid;grid-template-columns: repeat(7, 1fr); gap:6px; padding:8px}
     .heatday{height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#0b1220;background:#e5e7eb}
     .heat-legend{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;flex-wrap:wrap}
@@ -76,17 +82,25 @@
     .kpi-card{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#f8fafc);box-shadow:0 4px 12px rgba(2,6,23,0.06);display:flex;flex-direction:column;justify-content:center;gap:6px}
     .kpi-value{font-size:20px;font-weight:800}
     .kpi-label{font-size:12px;color:#6b7280}
-    /* password input with eye button */
+    
+    /* Password Toggle */
     .pwd-wrap{position:relative}
     .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;border:none;padding:6px;border-radius:6px;cursor:pointer;z-index:3;color:#6b7280;display:inline-flex;align-items:center;justify-content:center}
     .pwd-toggle svg{width:20px;height:20px;opacity:0.95;stroke:currentColor;fill:none}
     .pwd-toggle:focus{outline:2px solid rgba(59,130,246,0.35);box-shadow:0 0 0 3px rgba(59,130,246,0.12)}
+    
+    /* Timeline & Alerts */
     #timeline .timeline-item {display:flex;gap:8px;align-items:center;margin-bottom:8px}
     .bar{height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden}
     .bar-fill{height:100%;width:0%;background:#10b981;border-radius:999px}
     .alerts-list{list-style:none;padding:0;margin:0;max-height:220px;overflow:auto}
     .alerts-list li{padding:8px;border-radius:8px;background:#fff;margin-bottom:8px;border:1px solid #f1f5f9}
     .alerts-severity-low{color:#b91c1c;font-weight:700}
+
+    /* Detail View Badges */
+    .status-badge { font-weight:700; padding:4px 8px; border-radius:6px; font-size:12px; display:inline-block; }
+    .status-badge.p { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .status-badge.a { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -94,7 +108,6 @@
 </head>
 
 <body class="theme-login">
-  <!-- LOGIN -->
   <div id="loginScreen" class="login-wrapper">
     <div class="login-card">
       <div class="login-header">
@@ -108,17 +121,9 @@
       <input id="loginEmail" type="email" class="login-input" placeholder="Enter email" />
       <label class="login-label" for="loginPassword">Password</label>
 
-      <!-- Password field with visible toggle button (eye / eye-off)
-           Inline default SVG provided so icon is visible even before JS runs -->
       <div class="pwd-wrap">
         <input id="loginPassword" type="password" class="login-input" placeholder="Enter password" style="padding-right:52px" />
-        <button id="pwdToggleBtn" class="pwd-toggle" aria-label="Show password" title="Show password" type="button">
-          <!-- default eye icon (visible by default) -->
-          <svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8S2 12 2 12z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-        </button>
+        <button id="pwdToggleBtn" class="pwd-toggle" aria-label="Show password" title="Show password" type="button"></button>
       </div>
 
       <button id="loginSubmit" class="login-btn"><span>🔒</span><span>Login</span></button>
@@ -130,7 +135,6 @@
     </div>
   </div>
 
-  <!-- MAIN APP -->
   <div id="appContainer" class="app-container" aria-hidden="true">
     <header>
       <h2>TYBCA Attendance Dashboard</h2>
@@ -148,7 +152,7 @@
 
     <main>
       <section class="left">
-        <div class="panel">
+        <div class="panel" id="userListPanel">
           <h3 class="panel-title">User List</h3>
           <div class="controls-row">
             <select id="sortSelect">
@@ -166,7 +170,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="lecturePanel">
           <h3 class="panel-title">Lecture / Session Details</h3>
           <div class="form-row"><label>Lecture</label><select id="lectureSelect"></select></div>
           <div class="form-row"><label>Type</label><select id="lectureType"><option value="Regular">Regular Lecture</option><option value="ProxyLecture">Proxy Lecture</option></select></div>
@@ -179,6 +183,22 @@
           <div class="form-row"><button id="submitAttendanceBtn">Submit Attendance</button><button id="cancelEditBtn" class="secondary" style="display:none">Cancel Edit</button></div>
         </div>
 
+        <div id="dailyStatusPanel" class="panel">
+          <h3 class="panel-title">Today's Attendance Status</h3>
+          <div id="dailyStatusWrap" style="max-height:220px;overflow:auto;margin-top:8px">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr>
+                  <th>Roll</th>
+                  <th>Name</th>
+                  <th style="text-align:right">Status</th>
+                </tr>
+              </thead>
+              <tbody id="dailyStatusBody"></tbody>
+            </table>
+          </div>
+        </div>
+
         <div id="dailyPercentPanel" class="panel" data-panel="dailyPercentPanel">
           <h3 class="panel-title">Daily Percent (recent days)</h3>
           <div id="heatbarList" style="margin-top:8px"></div>
@@ -189,6 +209,19 @@
             <div class="heat-legend-item"><div style="width:16px;height:12px;background:#f59e0b;border-radius:3px"></div><div>25-49%</div></div>
             <div class="heat-legend-item"><div style="width:16px;height:12px;background:#f97316;border-radius:3px"></div><div>1-24%</div></div>
             <div class="heat-legend-item"><div style="width:16px;height:12px;background:#e5e7eb;border-radius:3px"></div><div>0%</div></div>
+          </div>
+        </div>
+
+        <div id="detailsViewPanel" class="panel" style="display:none;">
+          <h3 class="panel-title" id="detailsViewTitle">Selected Record Details</h3>
+          <button id="closeDetailsBtn" class="secondary" style="margin-bottom:8px;font-size:12px">Close Details</button>
+          <div id="detailsViewWrap" style="max-height:260px;overflow:auto;margin-top:6px">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr><th>Roll</th><th>Name</th><th style="text-align:right">Status</th></tr>
+              </thead>
+              <tbody id="detailsViewBody"></tbody>
+            </table>
           </div>
         </div>
 
@@ -228,7 +261,6 @@
           <canvas id="studentsPie" height="110"></canvas>
         </div>
 
-        <!-- Overview replacing Leaderboard -->
         <div class="panel" id="overviewPanel">
           <h3 class="panel-title">Overview</h3>
           <div class="kpi-row" style="margin-top:8px">
@@ -258,7 +290,6 @@
           </div>
         </div>
 
-        <!-- Faculty Summary panel (after pie chart) -->
         <div class="panel" id="facultySummaryPanel" data-panel="facultySummaryPanel">
           <h3 class="panel-title">Faculty Summary</h3>
           <div style="font-size:13px;color:#6b7280;margin-top:6px">Summary of lectures by faculty (total / regular / proxy)</div>
@@ -272,7 +303,6 @@
           </div>
         </div>
 
-        <!-- Timeline panel -->
         <div class="panel" id="timelinePanel" data-panel="timelinePanel">
           <h3 class="panel-title">Today's Timeline</h3>
           <div id="timeline" style="margin-top:8px"></div>
@@ -284,7 +314,6 @@
     <footer>TY-BCA 2025-26 • Digital Attendance • Powered by Supabase</footer>
   </div>
 
-  <!-- Attendance viewer modal -->
   <div id="attModalBackdrop" class="att-modal-backdrop" aria-hidden="true">
     <div class="att-modal" role="dialog" aria-modal="true" aria-labelledby="attModalTitle">
       <div class="att-modal-header">
@@ -300,15 +329,12 @@
     </div>
   </div>
 
-  <!-- ========== CONFIG (SUPABASE) ========= -->
   <script>
-    // Replace with your values if needed
     const SUPABASE_URL = "https://hunnkdhhacqwhpqxovte.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1bm5rZGhoYWNxd2hwcXhvdnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MTI4MzIsImV4cCI6MjA3OTQ4ODgzMn0.MAGBD6youFiHbCVxCd_3sD4DMidEuVBFaoncj1RLxGk";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
 
-  <!-- ========== MAIN JS ========= -->
   <script>
     (function(){
       // state
@@ -350,12 +376,19 @@
       const studentsStatsText = document.getElementById("studentsStatsText");
       const scanLogTbody = document.querySelector("#scanLogTable tbody");
 
+      // NEW DETAIL PANEL REFS
+      const detailsViewPanel = document.getElementById('detailsViewPanel');
+      const detailsViewTitle = document.getElementById('detailsViewTitle');
+      const detailsViewBody = document.getElementById('detailsViewBody');
+      const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+
       // visual containers & new items
       const heatmapEl = document.getElementById("heatmap");
       const heatbarList = document.getElementById("heatbarList");
       const timelineEl = document.getElementById("timeline");
       const facultySummaryBody = document.getElementById("facultySummaryBody");
       const alertsList = document.getElementById("alertsList");
+      const dailyStatusBody = document.getElementById("dailyStatusBody");
 
       // KPI & trend elements
       const kpiAvg7d = document.getElementById("kpiAvg7d");
@@ -365,8 +398,8 @@
 
       // password toggle wiring
       const pwdToggleBtn = document.getElementById('pwdToggleBtn');
-      const eyeIcon = `<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-      const eyeOffIcon = `<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-6 0-10-8-10-8a18.65 18.65 0 0 1 5.11-7.03"></path><path d="M1 1l22 22"></path><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"></path></svg>`;
+      const eyeIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+      const eyeOffIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-6 0-10-8-10-8a18.65 18.65 0 0 1 5.11-7.03"></path><path d="M1 1l22 22"></path><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"></path></svg>`;
 
       // init
       async function init(){
@@ -377,7 +410,6 @@
           console.warn('auth getSession failed', e);
         }
 
-        // event wiring
         loginSubmit.addEventListener("click", handleLogin);
         loginPassword.addEventListener("keydown", e => { if(e.key==="Enter") handleLogin(); });
         logoutBtn.addEventListener("click", logout);
@@ -394,47 +426,47 @@
         clearAllRecordsBtn.addEventListener("click", clearAllRecords);
         scanInput.addEventListener("keydown", e => { if(e.key==="Enter"){ const code=scanInput.value.trim(); scanInput.value=""; handleScan(code); }});
         lectureSelect.addEventListener("change", updateTimeFromLecture);
+        
+        // Close detail panel
+        closeDetailsBtn.addEventListener('click', () => {
+            detailsViewPanel.style.display = 'none';
+        });
 
-        // password toggle wiring (ensures visibility + keyboard support)
         if(pwdToggleBtn){
-          // set default (in case the inline svg is overridden)
           if(!pwdToggleBtn.innerHTML.trim()) pwdToggleBtn.innerHTML = eyeIcon;
           pwdToggleBtn.setAttribute('aria-label','Show password');
           pwdToggleBtn.title = 'Show password';
-          pwdToggleBtn.addEventListener('click', ()=>{
-            const isHidden = loginPassword.type === 'password';
-            if(isHidden){
-              loginPassword.type = 'text';
-              pwdToggleBtn.innerHTML = eyeOffIcon;
-              pwdToggleBtn.setAttribute('aria-label','Hide password');
-              pwdToggleBtn.title = 'Hide password';
-            } else {
-              loginPassword.type = 'password';
-              pwdToggleBtn.innerHTML = eyeIcon;
-              pwdToggleBtn.setAttribute('aria-label','Show password');
-              pwdToggleBtn.title = 'Show password';
-            }
-            pwdToggleBtn.focus();
-          });
-
-          // allow toggling with Enter/Space when focused
-          pwdToggleBtn.addEventListener('keydown', (e)=>{
-            if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pwdToggleBtn.click(); }
-          });
+          pwdToggleBtn.addEventListener('click', ()=>{ togglePassword(); });
+          pwdToggleBtn.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePassword(); }});
         }
+
+        document.getElementById('attModalCloseBtn').addEventListener('click', closeAttendanceModal);
+        document.getElementById('attModalBackdrop').addEventListener('click', function(e){ if(e.target===this) closeAttendanceModal(); });
 
         attendanceDate.value = new Date().toISOString().slice(0,10);
 
-        // initial load
         await loadStudents(); await loadFaculty(); await loadLectures(); await loadAttendanceRecords();
         populateLectures(); populateFacultySelects(); updateTimeFromLecture();
         userTypeSel.value = "student"; setUserListForType(); applyRolePermissions();
         updateSummary(); renderAllCharts(); renderHeatmap();
       }
 
-      // ----------------------------
-      // Auth + session handling
-      // ----------------------------
+      function togglePassword(){
+        const isHidden = loginPassword.type === 'password';
+        if(isHidden){
+          loginPassword.type = 'text';
+          pwdToggleBtn.innerHTML = eyeOffIcon;
+          pwdToggleBtn.setAttribute('aria-label','Hide password');
+          pwdToggleBtn.title = 'Hide password';
+        } else {
+          loginPassword.type = 'password';
+          pwdToggleBtn.innerHTML = eyeIcon;
+          pwdToggleBtn.setAttribute('aria-label','Show password');
+          pwdToggleBtn.title = 'Show password';
+        }
+        pwdToggleBtn.focus();
+      }
+
       async function handleLogin(){
         const email = loginEmail.value.trim(), password = loginPassword.value.trim();
         if(!email||!password){ showAlert("Please enter email and password"); return; }
@@ -475,12 +507,19 @@
         const canEdit = currentRole==="admin"||currentRole==="faculty";
         const canDelete = currentRole==="admin";
         submitBtn.disabled = !canEdit; selectAllBtn.disabled = !canEdit; clearAllBtn.disabled = !canEdit; clearAllRecordsBtn.disabled = !canDelete;
+        
+        const userListPanel = document.getElementById('userListPanel');
+        const lecturePanel = document.getElementById('lecturePanel');
+        if(currentRole === "student"){
+          userListPanel.style.display = "none";
+          lecturePanel.style.display = "none";
+        } else {
+          userListPanel.style.display = "";
+          lecturePanel.style.display = "";
+        }
         renderList(); renderRecords();
       }
 
-      // ----------------------------
-      // Data loading
-      // ----------------------------
       async function loadStudents(){ try{ const { data, error } = await supabase.from("students").select("*").order("roll_no",{ascending:true}); if(error) throw error; students = (data||[]).map(s=>({roll:s.roll_no,name:s.name,id:s.id})); }catch(err){ console.error(err); showAlert("❌ Error loading students"); } }
       async function loadFaculty(){ try{ const { data, error } = await supabase.from("faculty").select("*").order("roll_no",{ascending:true}); if(error) throw error; faculty = (data||[]).map(f=>({roll:f.roll_no,name:f.name,id:f.id})); }catch(err){ console.error(err); showAlert("❌ Error loading faculty"); } }
       async function loadLectures(){ try{ const { data, error } = await supabase.from("lectures").select("*").order("name",{ascending:true}); if(error) throw error; lectures = data || []; }catch(err){ console.error(err); showAlert("❌ Error loading lectures"); } }
@@ -506,29 +545,49 @@
           renderRecords();
         }catch(err){ console.error(err); showAlert("❌ Error loading attendance records"); } }
 
-      // ----------------------------
-      // UI helpers
-      // ----------------------------
-      function setUserListForType(){ const type = userTypeSel.value; currentList = (type==="student"?students:faculty).map(x=>({...x})); attendanceState={}; currentList.forEach(p=>attendanceState[p.roll]={present:false}); renderList(); }
+      function setUserListForType(){ 
+        const type = userTypeSel.value; 
+        currentList = (type==="student"?students:faculty).map(x=>({...x})); 
+        attendanceState={}; 
+        currentList.forEach(p=>attendanceState[String(p.roll)]={present:false}); 
+        renderList(); 
+      }
       function onUserTypeChange(){ setUserListForType(); }
 
       function renderList(){
-        const q = searchBox.value.trim().toLowerCase(); let list = currentList.slice(); const mode = sortSelect.value;
+        const q = searchBox.value.trim().toLowerCase(); 
+        let list = currentList.slice(); 
+        const mode = sortSelect.value;
+        const canEdit = currentRole==="admin" || currentRole==="faculty";
+
         if(mode==="roll-asc") list.sort((a,b)=>a.roll-b.roll);
         if(mode==="roll-desc") list.sort((a,b)=>b.roll-a.roll);
         if(mode==="name-asc") list.sort((a,b)=>a.name.localeCompare(b.name));
-        if(mode==="present") list = list.filter(x=>attendanceState[x.roll]&&attendanceState[x.roll].present);
-        if(mode==="absent") list = list.filter(x=>!attendanceState[x.roll]||!attendanceState[x.roll].present);
+
+        if(mode==="present") list = list.filter(x=>attendanceState[String(x.roll)] && attendanceState[String(x.roll)].present);
+        if(mode==="absent") list = list.filter(x=>!attendanceState[String(x.roll)] || !attendanceState[String(x.roll)].present);
+        
         if(q) list = list.filter(x=>String(x.roll).includes(q) || x.name.toLowerCase().includes(q));
-        const canEdit = currentRole==="admin" || currentRole==="faculty";
+        
         usersTableBody.innerHTML = "";
         list.forEach(item=>{
           const tr = document.createElement("tr");
           const tdR = document.createElement("td"); tdR.textContent = item.roll;
           const tdN = document.createElement("td"); tdN.textContent = item.name;
           const tdC = document.createElement("td");
-          const chk = document.createElement("input"); chk.type="checkbox"; chk.checked = !!(attendanceState[item.roll] && attendanceState[item.roll].present); chk.disabled = !canEdit;
-          chk.addEventListener("change", e=>{ attendanceState[item.roll].present = e.target.checked; updateSummary(); });
+          
+          const chk = document.createElement("input"); 
+          chk.type="checkbox"; 
+          const rollKey = String(item.roll);
+          chk.checked = !!(attendanceState[rollKey] && attendanceState[rollKey].present); 
+          chk.disabled = !canEdit;
+          chk.addEventListener("change", e=>{ 
+            if(attendanceState[rollKey]) {
+                attendanceState[rollKey].present = e.target.checked; 
+            }
+            updateSummary(); 
+          });
+          
           tdC.appendChild(chk);
           tr.appendChild(tdR); tr.appendChild(tdN); tr.appendChild(tdC);
           usersTableBody.appendChild(tr);
@@ -536,20 +595,39 @@
         updateSummary();
       }
 
-      function setAll(val){ const canEdit = currentRole==="admin"||currentRole==="faculty"; if(!canEdit) return; currentList.forEach(x=>attendanceState[x.roll]={present:val}); renderList(); }
+      function setAll(val){ 
+        const canEdit = currentRole==="admin"||currentRole==="faculty"; 
+        if(!canEdit) return; 
+        currentList.forEach(x=>{
+            if(attendanceState[String(x.roll)]) {
+                attendanceState[String(x.roll)].present = val;
+            }
+        }); 
+        renderList(); 
+      }
 
       function populateLectures(){ lectureSelect.innerHTML = ""; lectures.forEach(l=>{ const opt=document.createElement("option"); opt.value=l.name; opt.textContent=l.name; lectureSelect.appendChild(opt); }); }
       function updateTimeFromLecture(){ const lecName = lectureSelect.value; const lec = lectures.find(l=>l.name===lecName); if(lec && lec.default_start_time && lec.default_end_time){ startTimeInput.value = lec.default_start_time; endTimeInput.value = lec.default_end_time; } else { startTimeInput.value=""; endTimeInput.value=""; } }
       function populateFacultySelects(){ const fill = el=>{ el.innerHTML=""; faculty.forEach(f=>{ const opt=document.createElement("option"); opt.value=f.name; opt.textContent=`${f.name} (${f.roll})`; el.appendChild(opt); }); }; fill(facultySelect); fill(originalFaculty); }
 
-      // submitAttendance
       async function submitAttendance(){
         const canEdit = currentRole==="admin"||currentRole==="faculty"; if(!canEdit){ showAlert("Only Admin and Faculty can submit attendance"); return; }
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Saving...";
+        
         const date = attendanceDate.value || new Date().toISOString().slice(0,10);
         const lecture = lectureSelect.value; const lectureType = lectureTypeSelect.value || "Regular"; const day = daySelect.value || "";
         const facultyName = facultySelect.value; const proxy = isProxy.checked; const original = originalFaculty.value || "";
         const startTime = startTimeInput.value || ""; const endTime = endTimeInput.value || ""; const timeSlot = startTime && endTime ? `${startTime} to ${endTime}` : "";
-        const attendees = currentList.map(p=>({ roll: p.roll, name: p.name, status: attendanceState[p.roll] && attendanceState[p.roll].present ? "P" : "A" }));
+        
+        // Use Strict String Roll Key
+        const attendees = currentList.map(p=>{
+            const rollKey = String(p.roll);
+            const isPresent = attendanceState[rollKey] && attendanceState[rollKey].present;
+            return { roll: p.roll, name: p.name, status: isPresent ? "P" : "A" };
+        });
+        
         const presentCount = attendees.filter(a=>a.status==="P").length;
 
         try {
@@ -577,18 +655,36 @@
           await loadAttendanceRecords();
           exitEditMode(true);
           updateSummary(); renderAllCharts(); renderHeatmap();
-        } catch(err){ console.error(err); showAlert("❌ Error saving attendance: "+(err.message||err)); }
+        } catch(err){ 
+            console.error(err); 
+            showAlert("❌ Error saving attendance: "+(err.message||err)); 
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = isEditing ? "Update Attendance" : "Submit Attendance";
+        }
       }
 
       function enterEditMode(recordId, record){
+        attendanceState = {};
+
         isEditing = true; currentEditRecordId = recordId; submitBtn.textContent = "Update Attendance"; cancelEditBtn.style.display = "inline-flex";
         attendanceDate.value = record.date; lectureSelect.value = record.lecture; lectureTypeSelect.value = record.lectureType || "Regular"; daySelect.value = record.day || "Monday"; facultySelect.value = record.faculty || (faculty[0] && faculty[0].name);
         isProxy.checked = !!record.proxy; proxyDetails.style.display = isProxy.checked ? "block" : "none"; originalFaculty.value = record.original || facultySelect.value;
         let st = record.startTime || ""; let en = record.endTime || "";
         if((!st || !en) && record.timeSlot){ const parts = record.timeSlot.split(" to "); st = parts[0]||""; en = parts[1]||""; }
         startTimeInput.value = st; endTimeInput.value = en;
-        userTypeSel.value = "student"; setUserListForType();
-        currentList.forEach(p=>{ const found = (record.attendees||[]).find(a=>a.roll===p.roll); attendanceState[p.roll].present = found ? found.status==="P" : false; });
+        userTypeSel.value = "student"; 
+        
+        const type = userTypeSel.value; 
+        currentList = (type==="student"?students:faculty).map(x=>({...x})); 
+        
+        // Strict String comparison to load existing state
+        currentList.forEach(p=>{ 
+            const rollKey = String(p.roll);
+            const found = (record.attendees||[]).find(a=>String(a.roll) === rollKey); 
+            attendanceState[rollKey] = { present: found ? found.status==="P" : false }; 
+        });
+        
         renderList();
       }
 
@@ -603,10 +699,9 @@
 
         records.forEach((r)=>{
           const tr = document.createElement("tr");
-          const viewAllBtn = (currentRole === 'admin') ? `<button class="record-action view" type="button" aria-label="View all attendees">View All</button>` : '';
-          const viewPresentBtn = `<button class="record-action present" type="button" aria-label="View present attendees">Present</button>`;
-          const viewAbsentBtn = `<button class="record-action absent" type="button" aria-label="View absent attendees">Absent</button>`;
-
+          // Replaced Present button with just View button that triggers new panel
+          const viewBtn = `<button class="record-action view" type="button" aria-label="View Details">View</button>`;
+          
           const editHtml = canEdit ? `<button class="record-action edit" type="button" aria-label="Edit record">Edit</button>` : `<span style="display:inline-block;padding:6px 8px;border-radius:8px;color:#9ca3af">-</span>`;
           const deleteHtml = canDelete ? `<button class="record-action delete" type="button" aria-label="Delete record">Delete</button>` : "";
 
@@ -618,18 +713,15 @@
              <td>${escapeHtml(r.lecture)}</td>
              <td>${escapeHtml(r.faculty)}</td>
              <td>${badgeHtml}</td>
-             <td class="actions">${viewAllBtn} ${viewPresentBtn} ${viewAbsentBtn}</td>
+             <td class="actions">${viewBtn}</td>
              <td style="${canEdit ? "" : "display:none;"}">${editHtml}</td>
              <td style="${canDelete ? "" : "display:none;"}">${deleteHtml}</td>`;
 
           recordsTableBody.appendChild(tr);
 
           const tdView = tr.querySelectorAll("td")[5];
-          if(tdView.querySelector(".record-action.view")){
-            tdView.querySelector(".record-action.view").addEventListener("click", ()=>openAttendanceModal(r,'all'));
-          }
-          tdView.querySelector(".record-action.present").addEventListener("click", ()=>openAttendanceModal(r,'present'));
-          tdView.querySelector(".record-action.absent").addEventListener("click", ()=>openAttendanceModal(r,'absent'));
+          const vBtn = tdView.querySelector(".record-action.view");
+          if(vBtn) vBtn.addEventListener("click", ()=>viewRecordDetails(r));
 
           if(canEdit){
             const editBtn = tr.querySelector(".record-action.edit");
@@ -653,52 +745,39 @@
         }catch(err){ console.error(err); showAlert("❌ Error deleting record"); }
       }
 
-      function openAttendanceModal(record, filter){
-        const backdrop = document.getElementById('attModalBackdrop');
-        const titleEl = document.getElementById('attModalTitle');
-        const subEl = document.getElementById('attModalSubtitle');
-        const content = document.getElementById('attModalContent');
-        if(!record) return;
-        const date = record.date||'', lecture = record.lecture||'', total = record.total || (record.attendees?record.attendees.length:0);
-        let filtered = (record.attendees||[]).slice();
-        if(filter==='present') filtered = filtered.filter(a=>a.status==='P');
-        if(filter==='absent') filtered = filtered.filter(a=>a.status==='A');
-        const count = filtered.length;
-        const filterLabel = filter==='all'?'All':(filter==='present'?'Present':'Absent');
-
-        titleEl.textContent = `${lecture || 'Lecture'} — ${date}`;
-        subEl.innerHTML = `<span class="record-meta">${filterLabel} • ${count}/${total} attendees</span>`;
-
-        const exportBtn = `<button class="record-action" id="exportRecordCsv" type="button" aria-label="Export record CSV">Export CSV</button>`;
-
-        if(!filtered.length){
-          content.innerHTML = `<div style="margin-bottom:8px">${exportBtn}</div><div class="att-modal-empty">No records for the selected filter.</div>`;
-        } else {
-          let html = `<div style="margin-bottom:8px">${exportBtn}</div><table><thead><tr><th>Roll</th><th>Name</th><th>Status</th></tr></thead><tbody>`;
-          filtered.forEach(a=>{ html += `<tr><td>${escapeHtml(a.roll)}</td><td>${escapeHtml(a.name)}</td><td>${a.status === 'P' ? 'P' : 'A'}</td></tr>`; });
-          html += `</tbody></table>`;
-          content.innerHTML = html;
-        }
-
-        const exportEl = document.getElementById('exportRecordCsv');
-        if(exportEl){
-          exportEl.addEventListener('click', ()=>{
-            const rows = [['Roll','Name','Status']];
-            filtered.forEach(a=> rows.push([a.roll, a.name, a.status]));
-            const csv = rows.map(r=> r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `attendance_${record.id || 'record'}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
+      // NEW FUNCTION TO SHOW DETAILS IN THE NEW PANEL
+      function viewRecordDetails(record){
+          detailsViewTitle.textContent = `${record.lecture} (${record.date})`;
+          detailsViewBody.innerHTML = "";
+          
+          // Safety sort: P first, deduplicate
+          let uniqueAttendees = [];
+          const seen = new Set();
+          const sorted = (record.attendees||[]).slice().sort((a,b) => (a.status==='P' ? -1 : 1));
+          
+          sorted.forEach(a=>{
+             const k = String(a.roll);
+             if(!seen.has(k)){ seen.add(k); uniqueAttendees.push(a); }
           });
-        }
+          
+          // Sort by Roll for display
+          uniqueAttendees.sort((a,b)=> a.roll - b.roll);
 
-        backdrop.style.display = 'flex';
-        backdrop.setAttribute('aria-hidden','false');
-        document.querySelector('.att-modal').scrollTop = 0;
+          uniqueAttendees.forEach(a=>{
+              const tr = document.createElement('tr');
+              const badgeClass = a.status==='P' ? 'status-badge p' : 'status-badge a';
+              const statusText = a.status==='P' ? 'Present' : 'Absent';
+              tr.innerHTML = `
+                <td>${a.roll}</td>
+                <td>${a.name}</td>
+                <td style="text-align:right"><span class="${badgeClass}">${statusText}</span></td>
+              `;
+              detailsViewBody.appendChild(tr);
+          });
+          
+          detailsViewPanel.style.display = 'block';
+          // scroll to panel
+          detailsViewPanel.scrollIntoView({ behavior: 'smooth' });
       }
 
       function closeAttendanceModal(){ const b = document.getElementById('attModalBackdrop'); b.style.display='none'; b.setAttribute('aria-hidden','true'); }
@@ -737,8 +816,30 @@
         renderStudentsPie();
         renderFacultySummary();
         renderTimeline();
-        renderRegularStudentsSummary();
         renderOverviewAndTrend();
+        renderDailyPercent();
+      }
+
+      function renderDailyPercent(){
+        heatbarList.innerHTML = "";
+        const dateList = {};
+        records.forEach(r=>{
+          if(!dateList[r.date]) dateList[r.date] = {present:0,total:0};
+          dateList[r.date].present += r.presentCount||0;
+          dateList[r.date].total += r.total||0;
+        });
+        const dates = Object.keys(dateList).sort().slice(-10);
+        dates.forEach(d=>{
+          const info=dateList[d]; const pct = info.total?(info.present/info.total)*100:0;
+          const row=document.createElement("div");
+          row.style.display="flex"; row.style.alignItems="center"; row.style.gap="8px"; row.style.marginBottom="6px";
+          row.innerHTML = `
+            <div style="width:70px;font-size:13px">${d}</div>
+            <div class="bar" style="flex:1"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div style="width:40px;font-size:13px;text-align:right">${pct.toFixed(0)}%</div>
+          `;
+          heatbarList.appendChild(row);
+        });
       }
 
       function renderStudentsPie(){
@@ -757,7 +858,6 @@
         studentsPieChart = new Chart(ctx, { type:'pie', data:{ labels:['Present','Absent'], datasets:[{ data:[present,absent] }] }, options:{ plugins:{ legend:{display:true,position:'bottom'}, tooltip:{ callbacks:{ label:function(ctx){ const dataArr = ctx.dataset.data; const total = dataArr.reduce((a,b)=>a+b,0)||1; const value = ctx.parsed; const p = ((value/total)*100).toFixed(1); return `${p}%`; } } } } } });
       }
 
-      // Faculty summary
       function renderFacultySummary(){
         if(!facultySummaryBody) return;
         const summary = {};
@@ -784,14 +884,9 @@
         facultySummaryBody.innerHTML = html || `<tr><td colspan="4" style="padding:12px;color:#6b7280">No data available</td></tr>`;
       }
 
-      function renderRegularStudentsSummary(){
-        // kept for compatibility (no separate panel shown by design)
-      }
-
       function renderHeatmap(){
         if(!heatmapEl) return;
         heatmapEl.innerHTML = "";
-        heatbarList.innerHTML = "";
         const days = 30;
         const now = new Date(attendanceDate.value || new Date().toISOString().slice(0,10));
         const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -822,16 +917,6 @@
           div.textContent = d.date.slice(5).replace("-","/");
           heatmapEl.appendChild(div);
         });
-        const recent = dailyPct.slice(-7).reverse();
-        recent.forEach(r=>{
-          const el = document.createElement('div');
-          el.style.display="flex"; el.style.justifyContent="space-between"; el.style.padding="6px 4px"; el.style.alignItems="center";
-          const colorBox = document.createElement('div'); colorBox.style.width="36px"; colorBox.style.height="12px"; colorBox.style.background=colorFor(r.pct); colorBox.style.borderRadius="4px";
-          el.innerHTML = `<div style="font-size:13px">${r.date}</div><div style="display:flex;align-items:center;gap:8px"><div>${r.pct}%</div></div>`;
-          const right = el.querySelector('div > div');
-          if(right) right.replaceWith(colorBox);
-          heatbarList.appendChild(el);
-        });
       }
 
       function renderTimeline(){
@@ -859,7 +944,6 @@
         });
       }
 
-      // ========== NEW Overview + Trend + Alerts ==========
       function renderOverviewAndTrend(){
         renderOverviewKPIs();
         renderAttendanceTrend();
@@ -957,15 +1041,49 @@
         }
       }
 
-      // ---------------------------- remaining functions ----------------------------
+      function renderDailyStatus(){
+        const tbody = dailyStatusBody;
+        if(!tbody) return;
+        const today = attendanceDate.value || new Date().toISOString().slice(0,10);
+        const presentSet = new Set();
+        
+        records.filter(r=>r.date===today).forEach(r=>{
+          (r.attendees||[]).forEach(a=>{
+            if(a.status==='P') presentSet.add(a.roll);
+          });
+        });
+        
+        const rows = [];
+        students.forEach(s=>{
+          if(presentSet.has(s.roll)) rows.push({roll:s.roll,name:s.name,status:"Present"});
+        });
+        students.forEach(s=>{
+          if(!presentSet.has(s.roll)) rows.push({roll:s.roll,name:s.name,status:"Absent"});
+        });
+        tbody.innerHTML = rows.map(r=>`
+          <tr>
+            <td>${r.roll}</td>
+            <td>${r.name}</td>
+            <td style="text-align:right;font-weight:600;color:${r.status==='Present'?'#059669':'#dc2626'}">${r.status}</td>
+          </tr>
+        `).join("");
+      }
+
       async function handleScan(code){
         if(!code) return;
-        const roll = parseInt(code,10); if(isNaN(roll)){ showAlert("Scan code is not a valid roll number: "+code); return; }
-        const student = students.find(s=>s.roll===roll);
+        const student = students.find(s=>String(s.roll) === String(code));
         if(!student){ showAlert("No student found for scanned code: "+code); return; }
-        if(!attendanceState[roll]) attendanceState[roll] = { present:true }; else attendanceState[roll].present = true;
-        addScanLogEntry(roll, student.name); renderList();
-        try{ await supabase.from("scan_log").insert({ student_roll: roll, student_name: student.name, lecture_name: lectureSelect.value, scanned_by: currentUser ? currentUser.id : null }); }catch(err){ console.error("Error saving scan log:",err); }
+        
+        const rollKey = String(student.roll);
+        if(attendanceState[rollKey]) {
+            attendanceState[rollKey].present = true;
+        } else {
+            attendanceState[rollKey] = { present:true };
+        }
+        
+        addScanLogEntry(student.roll, student.name); 
+        renderList();
+        try{ await supabase.from("scan_log").insert({ student_roll: student.roll, student_name: student.name, lecture_name: lectureSelect.value, scanned_by: currentUser ? currentUser.id : null }); }catch(err){ console.error("Error saving scan log:",err); }
       }
 
       function addScanLogEntry(roll,name){ const now=new Date(); const timeStr=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}); const lecture = lectureSelect.value; scanLog.unshift({time:timeStr,roll,name,lecture}); if(scanLog.length>50) scanLog.pop(); renderScanLog(); }
@@ -985,7 +1103,16 @@
           .replace(/'/g, "&#39;");
       }
 
-      // start
+      function refreshEverything(){
+        updateSummary();
+        renderDailyStatus();
+        renderAllCharts();
+        renderHeatmap();
+        renderAlerts();
+        renderTimeline();
+        renderFacultySummary();
+      }
+
       init();
     })();
   </script>
